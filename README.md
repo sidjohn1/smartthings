@@ -1,4 +1,4 @@
-SmartThings-Smartapps
+SmartThings
 =====================
 
-A collection of smart apps for smartthings
+A collection of code for smartthings
