@@ -1,6 +1,6 @@
 /**
  *  Smart turn it on
- *
+ *  Smartthings Smartapp
  *  Author: sidjohn1@gmail.com
  *  Date: 2013-10-21
  */
