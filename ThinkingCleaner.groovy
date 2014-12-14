@@ -27,6 +27,8 @@ metadata {
 		capability "Tone"
         
         command "spot"
+        
+        attribute "percent", "number"
 	}
 
 	simulator {
@@ -89,30 +91,38 @@ def parse(String description) {
             switch (result.status.cleaner_state) {
 				case "st_base":
         		sendEvent(name: 'status', value: "docked", state: "docked" as String)
+                sendEvent(name: 'switch', value: "off", state: "off" as String)
 				break;
 				case "st_base_recon":
         		sendEvent(name: 'status', value: "charging", state: "charging" as String)
+                sendEvent(name: 'switch', value: "off", state: "off" as String)
 				break;
                 case "st_base_full":
         		sendEvent(name: 'status', value: "charging", state: "charging" as String)
+                sendEvent(name: 'switch', value: "off", state: "off" as String)
 				break;
                 case "st_base_trickle":
         		sendEvent(name: 'status', value: "charging", state: "charging" as String)
+                sendEvent(name: 'switch', value: "off", state: "off" as String)
 				break;
                 case "st_base_wait":
         		sendEvent(name: 'status', value: "docked", state: "docked" as String)
+                sendEvent(name: 'switch', value: "off", state: "off" as String)
 				break;
                 case "st_clean":
         		sendEvent(name: 'status', value: "cleaning", state: "cleaning" as String)
+                sendEvent(name: 'switch', value: "on", state: "on" as String)
 				break;
                 case "st_cleanstop":
         		sendEvent(name: 'status', value: "waiting", state: "waiting" as String)
 				break;
                 case "st_clean_spot":
         		sendEvent(name: 'status', value: "cleaning", state: "cleaning" as String)
+                sendEvent(name: 'switch', value: "on", state: "on" as String)
 				break;
                 case "st_clean_max":
         		sendEvent(name: 'status', value: "cleaning", state: "cleaning" as String)
+                sendEvent(name: 'switch', value: "on", state: "on" as String)
 				break;
                 case "st_dock":
         		sendEvent(name: 'status', value: "docking", state: "docking" as String)
