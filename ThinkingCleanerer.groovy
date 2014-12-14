@@ -1,6 +1,6 @@
 /**
  *  Thinking Cleanerer
- *
+ *  Smartthings SmartApp
  *  Copyright 2014 Sidney Johnson
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -17,7 +17,7 @@ definition(
     name: "Thinking Cleanerer",
     namespace: "sidjohn1",
     author: "Sidney Johnson",
-    description: "Handles polling and job notification for Thinking Cleaner",
+    description: "Handles polling and job notification for Thinking Cleaner devicetype",
     category: "Convenience",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
