@@ -140,14 +140,6 @@ def parse(String description) {
 
 // handle commands
 
-def installed() {
-    log.debug "Installed with settings: ${settings}"
- 	def hosthex = convertIPtoHex(settings.ip)
-	def porthex = convertPortToHex("80")
-	device.deviceNetworkId = "$hosthex:$porthex"
-	log.debug "The device id configured is: $device.deviceNetworkId"
-}
-
 def updated() {
     log.debug "Updated with settings: ${settings}"
     def hosthex = convertIPtoHex(settings.ip)
