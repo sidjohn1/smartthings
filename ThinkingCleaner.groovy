@@ -1,5 +1,6 @@
 /**
  *  Thinking Cleaner
+ *	Smartthings Devicetype
  *
  *  Copyright 2014 Sidney Johnson
  *
@@ -109,15 +110,15 @@ def parse(String description) {
                 sendEvent(name: 'switch', value: "off", state: "off" as String)
 				break;
                 case "st_base_wait":
-        		sendEvent(name: 'status', value: "docked", state: "docked" as String)
+                sendEvent(name: 'status', value: "docked", state: "docked" as String)
                 sendEvent(name: 'switch', value: "off", state: "off" as String)
 				break;
                 case "st_clean":
-        		sendEvent(name: 'status', value: "cleaning", state: "cleaning" as String)
+                sendEvent(name: 'status', value: "cleaning", state: "cleaning" as String)
                 sendEvent(name: 'switch', value: "on", state: "on" as String)
 				break;
                 case "st_cleanstop":
-        		sendEvent(name: 'status', value: "waiting", state: "waiting" as String)
+               	sendEvent(name: 'status', value: "waiting", state: "waiting" as String)
 				break;
                 case "st_clean_spot":
         		sendEvent(name: 'status', value: "cleaning", state: "cleaning" as String)
