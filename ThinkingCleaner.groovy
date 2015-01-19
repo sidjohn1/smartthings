@@ -1,6 +1,6 @@
 /**
  *  Thinking Cleaner
- *  Smartthings Devicetype
+ *
  *  Copyright 2014 Sidney Johnson
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -11,6 +11,9 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
+ *
+ *	Version: 1.0 - Initial Version
+ *	Version: 1.1 - Fixed installed and updated functions
  *
  */
 import groovy.json.JsonSlurper
@@ -80,7 +83,7 @@ def parse(String description) {
 	def bodyString = new String(map.body.decodeBase64())
 	def slurper = new JsonSlurper()
 	def result = slurper.parseText(bodyString)
-	log.debug result
+//	log.debug result
 	switch (result.action) {
 		case "command":
         	log.debug result.action
@@ -140,14 +143,16 @@ def parse(String description) {
 
 // handle commands
 
-def updated() {
-    log.debug "Updated with settings: ${settings}"
-    def hosthex = convertIPtoHex(settings.ip)
-	def porthex = convertPortToHex("80")
-	device.deviceNetworkId = "$hosthex:$porthex"
-	log.debug "The device id configured is: $device.deviceNetworkId"
+def installed() {
+	log.debug "Installed with settings: ${settings}"
+	ipSetup()
 }
 
+def updated() {
+    log.debug "Updated with settings: ${settings}"
+    ipSetup()
+}
+ 
 def on() {
 	log.debug "Executing 'on'"
     api('on')
@@ -198,6 +203,10 @@ def api(String rooCommand, success = {}) {
         	rooPath = "/command.json?command=find_me"
             log.debug "The Beep Command was sent"
             break;
+        case "ip":
+        	rooPath = "/command.json?command=find_me"
+            log.debug "The Beep Command was sent"
+            break;
 }
 	def hubAction = ""
 	if (rooCommand != "refresh"){
@@ -215,6 +224,15 @@ def api(String rooCommand, success = {}) {
         )
     }
 	return hubAction
+}
+
+def ipSetup() {
+	if (settings.ip) {
+ 	def hosthex = convertIPtoHex(settings.ip)
+	def porthex = convertPortToHex("80")
+	device.deviceNetworkId = "$hosthex:$porthex"
+	log.debug "The device id configured is: $device.deviceNetworkId"
+    }
 }
 
 private String convertIPtoHex(ip) { 
