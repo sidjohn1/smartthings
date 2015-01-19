@@ -1,6 +1,6 @@
 /**
  *  Thinking Cleaner
- *	Smartthings Devicetype
+ *  Smartthings Devicetype
  *
  *  Copyright 2014 Sidney Johnson
  *
