@@ -1,8 +1,10 @@
 /**
  *  Thinking Cleaner
- *  Smartthings Devicetype
+ *
+ *	Smartthings Devicetype
  *
  *  Copyright 2014 Sidney Johnson
+ *  If you like this device, please support the developer via PayPal: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XKDRYZ3RUNR9Y
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -15,6 +17,7 @@
  *
  *	Version: 1.0 - Initial Version
  *	Version: 1.1 - Fixed installed and updated functions
+ *  Version: 1.2 - Added error tracking, and better icons, link state
  *
  */
 import groovy.json.JsonSlurper
@@ -32,7 +35,7 @@ metadata {
         
         command "spot"
         
-        attribute "percent", "number"
+        attribute "network","string"
 	}
 
 	simulator {
@@ -67,13 +70,18 @@ tiles {
     	state ("default", label:'unknown', icon: "st.unknown.unknown.unknown")
 		state ("charging", label:'${currentValue}', icon: "st.Appliances.appliances13", backgroundColor: "#E5E500")
         state ("cleaning", label:'${currentValue}', icon: "st.Appliances.appliances13", backgroundColor: "#79b821")
-		state ("docked", label:'${currentValue}', icon: "st.quirky.spotter.quirky-spotter-plugged")
+		state ("docked", label:'${currentValue}', icon: "st.quirky.spotter.quirky-spotter-plugged", backgroundColor: "#79b821")
         state ("docking", label:'${currentValue}', icon: "st.Appliances.appliances13", backgroundColor: "#E5E500")
-        state ("off", label:'', icon: "st.thermostat.heating-cooling-off")
+        state ("error", label:'${currentValue}', icon: "st.Appliances.appliances13", backgroundColor: "#bc2323")
         state ("waiting", label:'${currentValue}', icon: "st.Appliances.appliances13")
 	}
+	standardTile("network", "device.network", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
+    	state ("default", label:'unknown', icon: "st.unknown.unknown.unknown")
+        state ("Connected", label:'Link Good', icon: "st.Appliances.appliances13", backgroundColor: "#79b821")
+		state ("Not Connected", label:'Link Bad', icon: "st.Appliances.appliances13", backgroundColor: "#bc2323")
+	}
 	main("clean")
-    details(["clean","spot","dock","beep","battery","status","refresh"])
+    details(["clean","spot","dock","battery","status","network","beep","refresh"])
 	}
 }
 
@@ -81,65 +89,92 @@ tiles {
 // parse events into attributes
 def parse(String description) {
 	def map = stringToMap(description)
+    def headerString = new String(map.headers.decodeBase64())
+//	log.debug headerString
+    if (headerString.contains("200 OK")) {
 	def bodyString = new String(map.body.decodeBase64())
+//	log.debug bodyString
 	def slurper = new JsonSlurper()
 	def result = slurper.parseText(bodyString)
-//	log.debug result
+//	log.debug result.action
 	switch (result.action) {
 		case "command":
-        	log.debug result.action
+			sendEvent(name: 'network', value: "Connected" as String)
 			break;
 		case "status":
-        	sendEvent(name: 'battery', value: result.status.battery_charge as Integer)
-//			log.debug result.status.cleaner_state
+            sendEvent(name: 'network', value: "Connected" as String)
+			sendEvent(name: 'battery', value: result.status.battery_charge as Integer)
             switch (result.status.cleaner_state) {
 				case "st_base":
-        		sendEvent(name: 'status', value: "docked", state: "docked" as String)
-                sendEvent(name: 'switch', value: "off", state: "off" as String)
+        		sendEvent(name: 'status', value: "docked" as String)
+                sendEvent(name: 'switch', value: "off" as String)
 				break;
 				case "st_base_recon":
-        		sendEvent(name: 'status', value: "charging", state: "charging" as String)
-                sendEvent(name: 'switch', value: "off", state: "off" as String)
+        		sendEvent(name: 'status', value: "charging" as String)
+                sendEvent(name: 'switch', value: "off" as String)
 				break;
                 case "st_base_full":
-        		sendEvent(name: 'status', value: "charging", state: "charging" as String)
-                sendEvent(name: 'switch', value: "off", state: "off" as String)
+        		sendEvent(name: 'status', value: "charging" as String)
+                sendEvent(name: 'switch', value: "off" as String)
 				break;
                 case "st_base_trickle":
-        		sendEvent(name: 'status', value: "charging", state: "charging" as String)
-                sendEvent(name: 'switch', value: "off", state: "off" as String)
+                sendEvent(name: 'status', value: "docked" as String)
+                sendEvent(name: 'switch', value: "off" as String)
 				break;
                 case "st_base_wait":
-                sendEvent(name: 'status', value: "docked", state: "docked" as String)
-                sendEvent(name: 'switch', value: "off", state: "off" as String)
+        		sendEvent(name: 'status', value: "docked" as String)
+                sendEvent(name: 'switch', value: "off" as String)
 				break;
                 case "st_clean":
-                sendEvent(name: 'status', value: "cleaning", state: "cleaning" as String)
-                sendEvent(name: 'switch', value: "on", state: "on" as String)
+                	if (result.status.cleaning == "1"){
+                    sendEvent(name: 'status', value: "cleaning" as String)
+                	sendEvent(name: 'switch', value: "on" as String)
+					}
+                	else {
+                    sendEvent(name: 'status', value: "error" as String)
+                	sendEvent(name: 'switch', value: "on" as String)
+					log.debug result.status.cleaner_state
+                    }
 				break;
                 case "st_cleanstop":
-               	sendEvent(name: 'status', value: "waiting", state: "waiting" as String)
+        		sendEvent(name: 'status', value: "waiting" as String)
 				break;
                 case "st_clean_spot":
-        		sendEvent(name: 'status', value: "cleaning", state: "cleaning" as String)
-                sendEvent(name: 'switch', value: "on", state: "on" as String)
+        		sendEvent(name: 'status', value: "cleaning" as String)
+                sendEvent(name: 'switch', value: "on" as String)
 				break;
                 case "st_clean_max":
-        		sendEvent(name: 'status', value: "cleaning", state: "cleaning" as String)
-                sendEvent(name: 'switch', value: "on", state: "on" as String)
+        		sendEvent(name: 'status', value: "cleaning" as String)
+                sendEvent(name: 'switch', value: "on" as String)
 				break;
                 case "st_dock":
-        		sendEvent(name: 'status', value: "docking", state: "docking" as String)
+        		sendEvent(name: 'status', value: "docking" as String)
+				break;
+                case "st_error":
+        		sendEvent(name: 'status', value: "error" as String)
 				break;
                 case "st_off":
-        		sendEvent(name: 'status', value: "off", state: "off" as String)
+                sendEvent(name: 'switch', value: "off" as String)
+                sendEvent(name: 'status', value: "error" as String)
+				break;
+                case "st_pickup":
+        		sendEvent(name: 'status', value: "error" as String)
 				break;
                 case "st_wait":
-        		sendEvent(name: 'status', value: "waiting", state: "waiting" as String)
+        		sendEvent(name: 'status', value: "waiting" as String)
 				break;
 			}
 			break;
 	}
+//	if (device.currentValue('battery') == 100) {
+//		sendEvent(name: 'status', value: "docked" as String)
+//		sendEvent(name: 'switch', value: "off" as String)
+//	}
+	}
+    else {
+    sendEvent(name: 'status', value: "error" as String)
+    log.debug headerString
+    }
 }
 
 // handle commands
@@ -156,6 +191,7 @@ def updated() {
  
 def on() {
 	log.debug "Executing 'on'"
+    ipSetup()
     api('on')
 }
 
@@ -165,6 +201,7 @@ def off() {
 }
 def spot() {
 	log.debug "Executing 'spot'"
+    ipSetup()
 	api('spot')
 }
 def poll() {
@@ -174,15 +211,24 @@ def poll() {
 
 def refresh() {
 	log.debug "Executing 'refresh'"
+    ipSetup()
     api('refresh')
 }
 
 def beep() {
 	log.debug "Executing 'beep'"
+    ipSetup()
 	api('beep')
 }
 def api(String rooCommand, success = {}) {
     def rooPath = ""
+    if (device.currentValue('network') == "unknown"){
+    	sendEvent(name: 'network', value: "Not Connected" as String)
+        log.debug "Network is not connected"
+    }
+    else {
+		sendEvent(name: 'network', value: "unknown" as String, displayed:false)
+    }
     switch (rooCommand) {
 		case "on":
 			rooPath = "/command.json?command=clean"
@@ -204,25 +250,31 @@ def api(String rooCommand, success = {}) {
         	rooPath = "/command.json?command=find_me"
             log.debug "The Beep Command was sent"
             break;
-        case "ip":
-        	rooPath = "/command.json?command=find_me"
-            log.debug "The Beep Command was sent"
-            break;
 }
 	def hubAction = ""
 	if (rooCommand != "refresh"){
-		hubAction = [new physicalgraph.device.HubAction(
-		method: "GET",
-		path: rooPath,
-		headers: [HOST: "${ip}:80", Accept: "application/json"]
-        ), delayAction(4500), api('refresh')]
+    	try {
+			hubAction = [new physicalgraph.device.HubAction(
+			method: "GET",
+			path: rooPath,
+			headers: [HOST: "${ip}:80", Accept: "application/json"]
+        	), delayAction(10000), api('refresh')]
+        }
+        catch (Exception e) {
+    	log.debug "Hit Exception $e on $hubAction"
+		}
     }
 	else {
-		hubAction = new physicalgraph.device.HubAction(
-		method: "GET",
-		path: rooPath,
-		headers: [HOST: "${ip}:80", Accept: "application/json"]
-        )
+    	try {
+			hubAction = new physicalgraph.device.HubAction(
+			method: "GET",
+			path: rooPath,
+			headers: [HOST: "${ip}:80", Accept: "application/json"]
+        	)
+		}
+        catch (Exception e) {
+    	log.debug "Hit Exception $e on $hubAction"
+		}
     }
 	return hubAction
 }
@@ -232,7 +284,7 @@ def ipSetup() {
  	def hosthex = convertIPtoHex(settings.ip)
 	def porthex = convertPortToHex("80")
 	device.deviceNetworkId = "$hosthex:$porthex"
-	log.debug "The device id configured is: $device.deviceNetworkId"
+//	log.debug "The device id configured is: $device.deviceNetworkId"
     }
 }
 
