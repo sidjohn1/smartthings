@@ -17,7 +17,7 @@
  *
  *	Version: 1.0 - Initial Version
  *	Version: 1.1 - Fixed installed and updated functions
- *  Version: 1.2 - Added error tracking, and better icons, link state
+ *	Version: 1.2 - Added error tracking, and better icons, link state
  *
  */
 import groovy.json.JsonSlurper
@@ -166,10 +166,6 @@ def parse(String description) {
 			}
 			break;
 	}
-//	if (device.currentValue('battery') == 100) {
-//		sendEvent(name: 'status', value: "docked" as String)
-//		sendEvent(name: 'switch', value: "off" as String)
-//	}
 	}
     else {
     sendEvent(name: 'status', value: "error" as String)
