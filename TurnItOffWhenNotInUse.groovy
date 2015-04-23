@@ -12,20 +12,26 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
+ *	Version: 1.0 - Initial Version
+ *	Version: 1.1 - Added the ability to turn off a differnt switch than the one being monitored
+ *
  */
 definition(
     name: "Turn It Off When Not in Use",
     namespace: "sidjohn1",
     author: "Sidney Johnson",
-    description: "Turns off device when wattage drops below a set level after a set time. Retires every 5min",
+    description: "Turns off device when wattage drops below a set level after a set time. Retires every 10min",
     category: "Green Living",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
 
 
 preferences {
-	section("Select switches to control...") {
-	input name: "switches", type: "capability.switch", multiple: false
+	section("Select switch to monitor power...") {
+	input name: "switch1", type: "capability.powerMeter", multiple: false
+	}
+    section("Select switch to turn off...") {
+	input name: "switch2", type: "capability.switch", multiple: false
 	}
     section("Turn them off at...") {
 	input name: "stopTime", type: "time", multiple: false
@@ -41,31 +47,30 @@ preferences {
 
 def installed() {
 	log.debug "Installed with settings: ${settings}"
-	schedule(startTime, "startTimerCallback")
 	schedule(stopTime, "stopTimerCallback")
 
 }
 
 def updated(settings) {
 	unschedule()
-	schedule(startTime, "startTimerCallback")
 	schedule(stopTime, "stopTimerCallback")
 }
 
 def startTimerCallback() {
 	log.debug "Turning on switches"
-	switches.on()
+	switch2.on()
 
 }
 
 def stopTimerCallback() {
-    if (switches.currentPower <= wattageLow) {
-    log.debug "Turning off switches. Current Wattage: ${switches.currentPower}"
-	switches.off()
+    if (switch1.currentPower <= wattageLow) {
+    log.debug "Turning off switches. Current Wattage: ${switch1.currentPower}"
+	switch2.off()
+    schedule(startTime, "startTimerCallback")
 	}
     else {
-	log.debug "Waiting for next poll cycle. Current Wattage: ${switches.currentPower}"
-    def fiveMinuteDelay = 60 * 5
-	runIn(fiveMinuteDelay, stopTimerCallback, [overwrite: true])
+	log.debug "Waiting for next poll cycle. Current Wattage: ${switch1.currentPower}"
+    def timeDelay = 60 * 10
+	runIn(timeDelay, stopTimerCallback, [overwrite: true])
     }
 }
