@@ -10,9 +10,9 @@ Weather Panel displays inside and outside temp and weather infomation as a web p
   <li>Upload some pictures to your Public > Wallpaper folder</li>
   <li>Select a picture and click "Copy public link"</li>
   (http://sidjohn1.github.io/smartthings/WeatherPanel/dropbox1.png)
-  <li>Copy the number after "/u/" and before "/Wallpaper/". This is your Dropbox Public UID<br>
-  ![img2](http://sidjohn1.github.io/smartthings/WeatherPanel/dropbox2.png)</li>
-  
+  <li>Copy the number after "/u/" and before "/Wallpaper/". This is your Dropbox Public UID</li>
+  (http://sidjohn1.github.io/smartthings/WeatherPanel/dropbox2.png)
+  <li>Create a file called index.json</li>
 </ol>
 
 
