@@ -12,7 +12,9 @@ Weather Panel displays inside and outside temp and weather infomation as a web p
   (http://sidjohn1.github.io/smartthings/WeatherPanel/dropbox1.png)
   <li>Copy the number after "/u/" and before "/Wallpaper/". This is your Dropbox Public UID</li>
   (http://sidjohn1.github.io/smartthings/WeatherPanel/dropbox2.png)
-  <li>Create a file called index.json</li>
+  <li>Create a file called index.json in your Public > Wallpaper folder</li>
+  Mac Users can use (create-index.json.sh) to automate the process
+  Windows Users can use (https://dl.dropboxusercontent.com/u/57462297/Wallpaper/index.json) as an example. Replace 00-05.jpg with the actual filename and add addition entries as needed. Just be sure there is no "," after the last "}".
 </ol>
 
 
