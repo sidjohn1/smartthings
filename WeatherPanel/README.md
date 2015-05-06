@@ -4,7 +4,8 @@ Weather Panel displays inside and outside temp and weather infomation as a web p
 <h2>How to use your own Dropbox Account</h2>
 <ol>
   <li>Login into your dropbox account and ensure you have a Public Folder</li>
-  <li>Enable your Public Folder with this link(https://www.dropbox.com/enable_public_folder)</li>
+  <li>Enable your Public Folder with this link
+  (https://www.dropbox.com/enable_public_folder)</li>
   <li>Create a Wallpaper folder inside your Public Folder</li>
   <li>Upload some pictures to your Public > Wallpaper folder</li>
   <li>Select a picture and click "Copy public link"</li>
