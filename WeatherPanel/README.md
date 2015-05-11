@@ -15,7 +15,7 @@ Select Create and your done creating a weather station!
   <li>Install the Weather Panel smartapp in the smartthings app </li>
   <li>Select Inside/Outside Temp Devices</li>
   <li>Select View URL and copy the URL into a broswer</li>
-  <li>IOS: Install webapp from browser<br>Android: Run URL in Full Screen Browser</li>
+  <li>IOS or Android: Install webapp from browser<br>*Reccomended*Android: Run URL in Full Screen Browser</li>
 </ol>
 <h2>How to use your own Dropbox Account</h2>
 <ol>
