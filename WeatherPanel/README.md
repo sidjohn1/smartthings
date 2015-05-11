@@ -8,7 +8,7 @@ Weather Panel displays inside and outside temp and weather infomation as a web p
   <li>For the Type select WeatherStation Tile</li>
   <li>Select values for both location and hub</li>
 </ol>
-> Create
+Select Create and your done!
 
 <h2>How to use your own Dropbox Account</h2>
 <ol>
