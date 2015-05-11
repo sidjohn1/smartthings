@@ -1,5 +1,14 @@
 <h1>Weather Panel</h1>
-Weather Panel displays inside and outside temp and weather infomation as a web page. Also has a random customizable background serviced by Dropbox public folders.<br>
+Weather Panel displays inside and outside temp and weather infomation as a web page. Also has a random customizable background serviced by Dropbox public folders.<br>Once installed ues the link to run it as a webapp on Andriod or IOS. On Andriod devices i highly recomend using "Full Screen Browser" from the Play Store to get rid of the navigation and status bars. (https://play.google.com/store/apps/details?id=tk.klurige.fullscreenbrowser)<br> Weather data is only pulled from the Smartthings default WeatherStation Tile. This can be added from:
+
+(https://graph.api.smartthings.com) > My Devices > + New Device >
+<ol>
+  <li>Give it a name, "Weather Station" will work fine</li>
+  <li>For "Device Network Id" give it a unique value, I used NA03</li>
+  <li>For the Type select WeatherStation Tile</li>
+  <li>Select values for both location and hub</li>
+</ol>
+> Create
 
 <h2>How to use your own Dropbox Account</h2>
 <ol>
