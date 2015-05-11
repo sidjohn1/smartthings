@@ -9,7 +9,14 @@ Weather Panel displays inside and outside temp and weather infomation as a web p
   <li>Select values for both location and hub</li>
 </ol>
 Select Create and your done creating a weather station!
-
+<h2>Instalation</h2>
+<ol>
+  <li>Copy the code from weatherpanel.groovy into a new smart app</li>
+  <li>Install the Weather Panel smartapp in the smartthings app </li>
+  <li>Select Inside/Outside Temp Devices</li>
+  <li>Select View URL and copy the URL into a broswer</li>
+  <li>IOS: Install webapp from browser<br>Android: Run URL in Full Screen Browser</li>
+</ol>
 <h2>How to use your own Dropbox Account</h2>
 <ol>
   <li>Login into your dropbox account and ensure you have a Public Folder</li>
