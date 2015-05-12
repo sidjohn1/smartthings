@@ -4,7 +4,7 @@ Weather Panel displays inside and outside temp and weather infomation as a web p
 (https://graph.api.smartthings.com) > My Devices > + New Device >
 <ol>
   <li>Give it a name, "Weather Station" will work fine</li>
-  <li>For "Device Network Id" give it a unique value, I used NA03</li>
+  <li>For "Device Network Id" give it a unique value, I used Weather01</li>
   <li>For the Type select WeatherStation Tile</li>
   <li>Select values for both location and hub</li>
 </ol>
