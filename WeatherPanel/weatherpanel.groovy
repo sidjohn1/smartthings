@@ -296,7 +296,7 @@ def generateURL() {
 			createAccessToken()
 			log.debug "Creating new Access Token: $state.accessToken"
 		} catch (ex) {
-			log.error "Did you forget to enable OAuth in SmartApp IDE settings for SmartTiles?"
+			log.error "Did you forget to enable OAuth in SmartApp IDE settings for Weather Panel?"
 			log.error ex
 		}
     }
