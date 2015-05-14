@@ -14,6 +14,7 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *	Version: 1.0 - Initial Version
+ *	Version: 1.1 - Fixed font size not changing the font size
  *
  */
 definition(
@@ -83,7 +84,7 @@ def updated() {
 def initialize() {
 	log.info "Weather Panel ${textVersion()} ${textCopyright()}"
     generateURL()
-    runEvery15Minutes(weatherRefresh)
+    runEvery10Minutes(weatherRefresh)
 }
 
 def weatherRefresh() {
@@ -111,14 +112,14 @@ switch (fontSize) {
 	font3 = "7"
 	break;
 	case "Medium":
-	font1 = "42"
-	font2 = "14"
-	font3 = "7"
+	font1 = "41"
+	font2 = "13"
+	font3 = "6"
 	break;
 	case "Small":
-	font1 = "42"
-	font2 = "14"
-	font3 = "7"
+	font1 = "40"
+	font2 = "12"
+	font3 = "5"
 	break;
 
 }
@@ -141,7 +142,7 @@ switch (fontColor) {
 	<meta name="apple-mobile-web-app-title" content="Weather Panel">
     <meta name="keywords" content="weather,panel,smartthings" />
     <meta name="Author" content="sidjohn1" />
-    <meta http-equiv="refresh" content="900" />
+    <meta http-equiv="refresh" content="300" />
     <!-- Apple Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
 	<meta name="mobile-web-app-capable" content="yes" />
@@ -233,7 +234,7 @@ font-size: 20px; font-size: ${font3}vmax;
 var orz=function(){alert('orz');};
 </script>
 <script type="text/javascript">
-	setTimeout(function(){window.location.href=window.location.href},900000);
+	setTimeout(function(){window.location.href=window.location.href},300000);
 </script>
 """
 }
@@ -288,15 +289,13 @@ def body() {
 	<div id="cond">${outsideWeather.currentValue("weather")}</div>
 """
 }
-def generateURL() {
-	log.debug "resetOauth: $settings.resetOauth, $resetOauth, $settings.resetOauth"
-    
+def generateURL() {    
 	if (!state.accessToken) {
 		try {
 			createAccessToken()
 			log.debug "Creating new Access Token: $state.accessToken"
 		} catch (ex) {
-			log.error "Did you forget to enable OAuth in SmartApp IDE settings for Weather Panel?"
+			log.error "Enable OAuth in SmartApp IDE settings for Weather Panel"
 			log.error ex
 		}
     }
@@ -306,7 +305,7 @@ def generateURL() {
 }
 
 private def textVersion() {
-    def text = "Version 1.0"
+    def text = "Version 1.1"
 }
 
 private def textCopyright() {
