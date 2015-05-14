@@ -121,8 +121,8 @@ switch (fontSize) {
 	font2 = "12"
 	font3 = "5"
 	break;
-
 }
+
 switch (fontColor) {
 	case "White":
 	color1 = "white"
@@ -136,20 +136,20 @@ switch (fontColor) {
 
 """
     <!-- Meta Data -->
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="Description" content="Weather Panel" />
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="Description" content="Weather Panel" />
 	<meta name="application-name" content="Weather Panel" />
 	<meta name="apple-mobile-web-app-title" content="Weather Panel">
-    <meta name="keywords" content="weather,panel,smartthings" />
-    <meta name="Author" content="sidjohn1" />
-    <meta http-equiv="refresh" content="300" />
-    <!-- Apple Web App -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="keywords" content="weather,panel,smartthings" />
+	<meta name="Author" content="sidjohn1" />
+	<meta http-equiv="refresh" content="300" />
+	<!-- Apple Web App -->
+	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="viewport" content = "width = device-width, initial-scale = 1.0, maximum-scale=1.0, user-scalable=0" />
-    <link rel="apple-touch-icon-precomposed" href="https://sidjohn1.github.io/smartthings/WeatherPanel/index.png" />
-    <!-- Stylesheets -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+	<meta name="viewport" content = "width = device-width, initial-scale = 1.0, maximum-scale=1.0, user-scalable=0" />
+	<link rel="apple-touch-icon-precomposed" href="https://sidjohn1.github.io/smartthings/WeatherPanel/index.png" />
+	<!-- Stylesheets -->
 <style type="text/css">
 body{
 	background-size: cover;
