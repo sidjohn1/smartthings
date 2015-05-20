@@ -35,6 +35,6 @@ Select Create and your done creating a weather station!<br>
   Windows Users can use (http://sidjohn1.github.io/smartthings/WeatherPanel/index.json) or (http://sidjohn1.github.io/smartthings/WeatherPanel/index2.json) as an example. Replace 00-05.jpg with the actual filename and add addition entries as needed. Just be sure there is no "," after the last "}".
 </ol>
 <h2>General FAQ:</h2>
-See: https://github.com/sidjohn1/smartthings
+See: https://github.com/sidjohn1/smartthings (Scroll to the bottom)
 
 
