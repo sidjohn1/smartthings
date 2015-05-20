@@ -5,15 +5,15 @@ A collection of code for smartthings
 If you find this code usefull, please support the developer via PayPal:<br/> [![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif) sidjohn1@gmail.com](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XKDRYZ3RUNR9Y)
 
 <h2>Details:</h2>
-<b>WeatherPanel:</b> Displays inside and outside temp and weather infomation as a web page. Also has a random customizable background serviced by Dropbox public folders. <br>
+<b>WeatherPanel:</b> Smartthings smartapp that displays inside and outside temp and weather infomation as a web page. Also has a random customizable background serviced by Dropbox public folders. <br>
 <b>SmartTurnItOn.groovy:</b> Turns on a device at a set time on set day(s) of the week on if a persons presense is detected. Also turns the device off after a set time<br>
-<b>ThermostatAutoAway.groovy:</b> Sets a thermostat to "Away" when presence(s) are no longer detected<br>
-<b>ThermostatAutoHome.groovy:</b> Sets a thermostat to "Home" when presence(s) are detected<br>
+<b>ThermostatAutoAway.groovy:</b> Smartthings smartapp that sets a thermostat to "Away" when presence(s) are no longer detected<br>
+<b>ThermostatAutoHome.groovy:</b> Smartthings smartapp that sets a thermostat to "Home" when presence(s) are detected<br>
 <b>ThinkingCleaner.groovy:</b> Thinking Cleaner(Roomba) devicetype for Smartthings<br>
 <b>ThinkingCleanerer.groovy:</b> Thinking Cleaner(Roomba) smartapp for Smartthings<br>
-<b>TurnItOffWhenNotInUse.groovy:</b> Monitors a Smart Power Outlet(powermeter) to turn off a device at a set time if the power usage is below a set point. Can also turn it back on at a set time
+<b>TurnItOffWhenNotInUse.groovy:</b> Smartthings smartapp that monitors a Smart Power Outlet(powermeter) to turn off a device at a set time if the power usage is below a set point. Can also turn it back on at a set time
 <h2>FAQ:</h2>
-How do i add a smartapp to Smartthings?
+<b>How do i add a smartapp to Smartthings?</b>
 <ol type="1">
   <li>Goto "https://graph.api.smartthings.com/ide/app/create" in your browser</li>
   <li>Click "From Code"</li>
@@ -21,6 +21,14 @@ How do i add a smartapp to Smartthings?
   <li>Click "Create"</li>
   <li>Click "Save"</li>
   <li>Click "Publish > For Me"</li>
+</ol>
+<b>How do i install a smartapp to Smartthings and make it run?</b>
+<ol type="1">
+  <li>Open the Smartthings app on your mobile device (smart phone, table, chrome extention)</li>
+  <li>Click "+" at the very botton of the list</li>
+  <li>At the top where you see "Things" and "Alerts" scroll right till you reach "My Apps"</li>
+  <li>Scroll down till you find the app you want to install and touch it</li>
+  <li>Enter the requested data and touch "Done"</li>
 </ol>
 
 
