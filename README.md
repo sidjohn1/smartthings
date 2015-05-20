@@ -22,7 +22,7 @@ If you find this code usefull, please support the developer via PayPal:<br/> [![
   <li>Click "Save"</li>
   <li>Click "Publish > For Me"</li>
 </ol>
-<b>How do i install a smartapp to Smartthings and make it run?</b>
+<b>How do i run SmartSetup to install a smartapp after it has been added to Smartthings and make it run?</b>
 <ol type="1">
   <li>Open the Smartthings app on your mobile device (smart phone, table, chrome extention)</li>
   <li>Click "+" at the very botton of the list</li>
