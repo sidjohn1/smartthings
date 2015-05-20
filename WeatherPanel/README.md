@@ -1,6 +1,6 @@
 <h1>Weather Panel</h1>
 Weather Panel displays inside and outside temp and weather infomation as a web page. Also has a random customizable background serviced by Dropbox public folders.<br>Once installed use the link to run it as a webapp on Andriod, IOS, or any desktop browser. On Andriod devices i highly recomend using "Full Screen Browser" from the Play Store to get rid of the navigation and status bars. (https://play.google.com/store/apps/details?id=tk.klurige.fullscreenbrowser)
-<h2>Getting the Weather</h2>
+<h2>Getting the Weather:</h2>
 Weather data is only pulled from the Smartthings default WeatherStation Tile. This can be added from:
 (https://graph.api.smartthings.com) > My Devices > + New Device >
 <ol>
@@ -19,7 +19,7 @@ Select Create and your done creating a weather station!<br>
   <li>Select View URL and copy the URL into a broswer</li>
   <li>IOS or Android: Install webapp from browser<br>Android: Run URL in Full Screen Browser *Reccomended for Android*</li>
 </ol>
-<h2>How to use your own Dropbox Account</h2>
+<h2>How to use your own Dropbox Account:</h2>
 <ol>
   <li>Login into your dropbox account and ensure you have a Public Folder</li>
   <li>Enable your Public Folder with this link</li>
@@ -34,5 +34,7 @@ Select Create and your done creating a weather station!<br>
   Mac Users can use (create-index.json.sh) to automate the process<br>
   Windows Users can use (http://sidjohn1.github.io/smartthings/WeatherPanel/index.json) or (http://sidjohn1.github.io/smartthings/WeatherPanel/index2.json) as an example. Replace 00-05.jpg with the actual filename and add addition entries as needed. Just be sure there is no "," after the last "}".
 </ol>
+<h2>General FAQ:</h2>
+See: https://github.com/sidjohn1/smartthings
 
 
