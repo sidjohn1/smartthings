@@ -17,7 +17,7 @@ If you find this code usefull, please support the developer via PayPal:<br/> [![
 <ol type="1">
   <li>Goto "https://graph.api.smartthings.com/ide/app/create" in your browser</li>
   <li>Click "From Code"</li>
-  <li>Copy all text from .groovy file and paste into text box</li>
+  <li>Copy all text from .groovy file and paste into text box (RAW makes this easier)</li>
   <li>Click "Create"</li>
   <li>Click "Save"</li>
   <li>Click "Publish > For Me"</li>
