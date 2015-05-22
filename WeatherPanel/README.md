@@ -6,7 +6,7 @@ Weather data is only pulled from the Smartthings default WeatherStation Tile. Th
 <ol>
   <li>Give it a name, "Weather Station" will work fine</li>
   <li>For "Device Network Id" give it a unique value, I used Weather01</li>
-  <li>For the Type select WeatherStation Tile</li>
+  <li>For the Type select SmartWeather Station Tile</li>
   <li>Select values for both location and hub</li>
 </ol>
 Select Create and your done creating a weather station!<br>
