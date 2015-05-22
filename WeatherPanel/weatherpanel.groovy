@@ -15,6 +15,7 @@
  *
  *	Version: 1.0 - Initial Version
  *	Version: 1.1 - Fixed font size not changing the font size
+ *	Version: 1.2 - Decoupled weather data refresh from wallpaper refresh
  *
  */
 definition(
@@ -54,17 +55,22 @@ def viewURL() {
 	dynamicPage(name: "viewURL", title: "${title ?: location.name} Weather Pannel URL", install:false) {
 		section() {
 			paragraph "Copy the URL below to any modern browser to view your ${title ?: location.name}s' Weather Panel. Add a shortcut to home screen of your mobile device to run as a native app."
-			input "weatherUrl", "text", title: "URL",defaultValue: "${generateURL()}", required:false
-			href url:"${generateURL()}", style:"embedded", required:false, title:"View", description:"Tap to view, then click \"Done\""
+			input "weatherUrl", "text", title: "URL",defaultValue: "${generateURL("html")}", required:false
+			href url:"${generateURL("html")}", style:"embedded", required:false, title:"View", description:"Tap to view, then click \"Done\""
 		}
 	}
 }
 
 
 mappings {
-    path("/ui") {
+    path("/html") {
 		action: [
 			GET: "generateHtml",
+		]
+	}
+	path("/json") {
+		action: [
+			GET: "generateJson",
 		]
 	}
 }
@@ -84,7 +90,7 @@ def updated() {
 def initialize() {
 	log.info "Weather Panel ${textVersion()} ${textCopyright()}"
     generateURL()
-    runEvery10Minutes(weatherRefresh)
+    weatherRefresh()
 }
 
 def weatherRefresh() {
@@ -95,6 +101,10 @@ def weatherRefresh() {
 
 def generateHtml() {
 	render contentType: "text/html", data: "<!DOCTYPE html>\n<html>\n<head>${head()}</head>\n<body>\n${body()}\n</body></html>"
+}
+
+def generateJson() {
+	render contentType: "application/json", data: "${jsonData()}"
 }
 
 def head() {
@@ -134,22 +144,20 @@ switch (fontColor) {
 	break;
 }
 
-"""
-    <!-- Meta Data -->
+"""<!-- Meta Data -->
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta name="Description" content="Weather Panel" />
 	<meta name="application-name" content="Weather Panel" />
 	<meta name="apple-mobile-web-app-title" content="Weather Panel">
 	<meta name="keywords" content="weather,panel,smartthings" />
 	<meta name="Author" content="sidjohn1" />
-	<meta http-equiv="refresh" content="300" />
-	<!-- Apple Web App -->
+<!-- Apple Web App -->
 	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<meta name="mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 	<meta name="viewport" content = "width = device-width, initial-scale = 1.0, maximum-scale=1.0, user-scalable=0" />
 	<link rel="apple-touch-icon-precomposed" href="https://sidjohn1.github.io/smartthings/WeatherPanel/index.png" />
-	<!-- Stylesheets -->
+<!-- Stylesheets -->
 <style type="text/css">
 body{
 	background-size: cover;
@@ -167,55 +175,53 @@ div{
 	text-shadow: 2px 1px 0px ${color2};
 	margin:0 0;
 }
-marquee{
-margin-top: 5%;
-}
 #icon{
-margin-top: 6%;
-font-size: 20px; font-size: ${font1}vmax;
-text-align: center;
-width: 100%;
-height: 55%;
+	margin-top: 6%;
+    margin-left: 2%;
+	font-size: 20px; font-size: ${font1}vmax;
+	text-align: center;
+	width: 100%;
+	height: 55%;
 }
 #temp1 {
-font-weight: bold;
-text-align: left;
-float: left;
-width: 48%;
-margin-top: -5%;
-margin-left: 2%;
-font-size: 20px; font-size: ${font2}vmax;
+	font-weight: bold;
+	text-align: left;
+	float: left;
+	width: 48%;
+	margin-top: -5%;
+	margin-left: 2%;
+	font-size: 20px; font-size: ${font2}vmax;
 }
 #temp2 {
-font-weight: bold;
-text-align: right;
-float: right;
-width: 48%;
-margin-top: -5%;
-margin-right: 2%;
-font-size: 20px; font-size: ${font2}vmax;
+	font-weight: bold;
+	text-align: right;
+	float: right;
+	width: 48%;
+	margin-top: -5%;
+	margin-right: 2%;
+	font-size: 20px; font-size: ${font2}vmax;
 }
 #cond {
-white-space: nowrap;
-font-weight: bold;
-margin-top: -3%;
-text-align: left;
-float: left;
-width: 96%;
-margin-left: 2%;
-font-size: 20px; font-size: ${font3}vmax;
+	white-space: nowrap;
+	font-weight: bold;
+	margin-top: -3%;
+	text-align: left;
+	float: left;
+	width: 96%;
+	margin-left: 2%;
+	font-size: 20px; font-size: ${font3}vmax;
 }
 </style>
 <link type="text/css" rel="stylesheet" href="https://sidjohn1.github.io/smartthings/WeatherPanel/index.css"/>
     <!-- Page Title -->
     <title>Weather Panel</title>
   	<!-- Javascript -->
-<script type="text/javascript" src="https://sidjohn1.github.io/smartthings/WeatherPanel/index.js"></script>
+<script type="text/javascript" charset="utf-8" src="https://sidjohn1.github.io/smartthings/WeatherPanel/index.js"></script>
 <script type="text/javascript">
 \$(window).load(function(){
 	var bg = '';
 	var tImage = new Image();
-	\$("#icon").click(function(){
+	\$("#data").click(function(){
 		var path="https://dl.dropboxusercontent.com/u/${dbuid}/Wallpaper/";
 		var fileList = "index.json";
 		\$.getJSON(path+fileList,function(list,status){
@@ -228,68 +234,87 @@ font-size: 20px; font-size: ${font3}vmax;
 			bg = bg.replace('#','%23');
 			document.body.background = bg;		
 		});
+        setTimeout('\$("#data").click()', 1800000);
 	});
-	\$("#icon").click();
+	\$("#data").click();
 });
-var orz=function(){alert('orz');};
 </script>
+
 <script type="text/javascript">
-	setTimeout(function(){window.location.href=window.location.href},300000);
+\$(document).ready(function(){
+	weatherData = function () {
+		\$.getJSON("${generateURL("json")}",function(weather){
+		var content = '';
+			\$.each(weather.data, function(i,data){
+	    		content += '<div id="icon"><i class="wi wi-' + data.icon + '"></i></div>';
+	    		content += '<div id="temp1">' + data.temp1 + '</div>';
+	    		content += '<div id="temp2">' + data.temp2 + '</div>';
+    			content += '<div id="cond">' + data.cond + '</div>';
+                \$("#data").empty();
+    			\$(content).prependTo("#data");
+    		});
+    	});
+    	setTimeout(weatherData, 600000);
+	}
+	weatherData();
+});
 </script>
 """
 }
 
 def body() {  
+"""<div id="data"></div>"""
+}
+
+def jsonData(){
+weatherRefresh()
 	def weatherIcons = [
-        "chanceflurries" :		"wi-day-snow",
-        "chancerain" :			"wi-day-rain",
-        "chancesleet" :			"wi-day-rain-mix",
-        "chancesnow" :			"wi-day-snow",
-        "chancetstorms" :		"wi-day-thunderstorm",
-        "clear" :				"wi-day-sunny",
-        "cloudy" :				"wi-day-cloudy",
-        "flurries" :			"wi-day-snow",
-        "fog" :					"wi-day-fog",
-        "hazy" :				"wi-day-haze",
-        "mostlycloudy" :		"wi-day-cloudy",
-        "mostlysunny" :			"wi-day-sunny",
-        "partlycloudy" :		"wi-day-cloudy",
-        "partlysunny" :			"wi-day-cloudy",
-        "rain" :				"wi-day-rain",
-        "sleet" :				"wi-day-sleet",
-        "snow" :				"wi-day-snow",
-        "sunny" :				"wi-day-sunny",
-        "tstorms" :				"wi-day-thunderstorm",
-        "nt_chanceflurries" :	"wi-night-alt-snow",
-        "nt_chancerain" :		"wi-night-alt-rain",
-        "nt_chancesleet" :		"wi-night-alt-hail",
-        "nt_chancesnow" :		"wi-night-alt-snow",
-        "nt_chancetstorms" :	"wi-night-alt-thunderstorm",
-        "nt_clear" :			"wi-night-clear",
-        "nt_cloudy" :			"wi-night-alt-cloudy",
-        "nt_flurries" :			"wi-night-alt-snow",
-        "nt_fog" :				"wi-night-fog",
-        "nt_hazy" :				"wi-dust",
-        "nt_mostlycloudy" :		"wi-night-alt-cloudy",
-        "nt_mostlysunny" :		"wi-night-alt-cloudy",
-        "nt_partlycloudy" :		"wi-night-alt-cloudy",
-        "nt_partlysunny" :		"wi-night-alt-cloudy",
-        "nt_sleet" :			"wi-night-alt-rain-mix",
-        "nt_rain" :				"wi-night-alt-rain",
-        "nt_snow" :				"wi-night-alt-snow",
-        "nt_sunny" :			"wi-night-clear",
-        "nt_tstorms" :			"wi-night-alt-thunderstorm"
+        "chanceflurries" :		"day-snow",
+        "chancerain" :			"day-rain",
+        "chancesleet" :			"day-rain-mix",
+        "chancesnow" :			"day-snow",
+        "chancetstorms" :		"day-thunderstorm",
+        "clear" :				"day-sunny",
+        "cloudy" :				"day-cloudy",
+        "flurries" :			"day-snow",
+        "fog" :					"day-fog",
+        "hazy" :				"day-haze",
+        "mostlycloudy" :		"day-cloudy",
+        "mostlysunny" :			"day-sunny",
+        "partlycloudy" :		"day-cloudy",
+        "partlysunny" :			"day-cloudy",
+        "rain" :				"day-rain",
+        "sleet" :				"day-sleet",
+        "snow" :				"day-snow",
+        "sunny" :				"day-sunny",
+        "tstorms" :				"day-thunderstorm",
+        "nt_chanceflurries" :	"night-alt-snow",
+        "nt_chancerain" :		"night-alt-rain",
+        "nt_chancesleet" :		"night-alt-hail",
+        "nt_chancesnow" :		"night-alt-snow",
+        "nt_chancetstorms" :	"night-alt-thunderstorm",
+        "nt_clear" :			"night-clear",
+        "nt_cloudy" :			"night-alt-cloudy",
+        "nt_flurries" :			"night-alt-snow",
+        "nt_fog" :				"night-fog",
+        "nt_hazy" :				"dust",
+        "nt_mostlycloudy" :		"night-alt-cloudy",
+        "nt_mostlysunny" :		"night-alt-cloudy",
+        "nt_partlycloudy" :		"night-alt-cloudy",
+        "nt_partlysunny" :		"night-alt-cloudy",
+        "nt_sleet" :			"night-alt-rain-mix",
+        "nt_rain" :				"night-alt-rain",
+        "nt_snow" :				"night-alt-snow",
+        "nt_sunny" :			"night-clear",
+        "nt_tstorms" :			"night-alt-thunderstorm"
         ]
+
 	def icon = weatherIcons[outsideWeather.currentValue("weatherIcon")]
 	def temperatureScale = getTemperatureScale()
-"""
-	<div id="icon"><i class="wi ${icon}"></i></div>
-	<div id="temp1">${outsideWeather.currentValue("temperature")}°${temperatureScale}</div>
-	<div id="temp2">${insideTemp.currentValue("temperature")}°${temperatureScale}</div>
-	<div id="cond">${outsideWeather.currentValue("weather")}</div>
-"""
+"""{"data": [{"icon":"${icon}","cond":"${outsideWeather.currentValue("weather")}","temp1":"${outsideWeather.currentValue("temperature")}°${temperatureScale}","temp2":"${insideTemp.currentValue("temperature")}°${temperatureScale}"}]}"""
 }
-def generateURL() {    
+
+private def generateURL(data) {    
 	if (!state.accessToken) {
 		try {
 			createAccessToken()
@@ -299,13 +324,12 @@ def generateURL() {
 			log.error ex
 		}
     }
-	def url = "https://graph.api.smartthings.com/api/smartapps/installations/${app.id}/ui?access_token=${state.accessToken}"
-	log.debug "${title ?: location.name}s' Weather Panel URL: $url"
+	def url = "https://graph.api.smartthings.com/api/smartapps/installations/${app.id}/${data}?access_token=${state.accessToken}"
 	return "$url"
 }
 
 private def textVersion() {
-    def text = "Version 1.1"
+    def text = "Version 1.2"
 }
 
 private def textCopyright() {
