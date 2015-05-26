@@ -16,6 +16,7 @@
  *	Version: 1.0 - Initial Version
  *	Version: 1.1 - Fixed font size not changing the font size
  *	Version: 1.2 - Decoupled weather data refresh from wallpaper refresh
+ *	Version: 1.3 - Minor formating tweaks, removed all static data from json
  *
  */
 definition(
@@ -114,6 +115,7 @@ def font2 = ""
 def font3 = ""
 def color1 = ""
 def color2 = ""
+def temperatureScale = getTemperatureScale()
 
 switch (fontSize) {
 	case "Large":
@@ -168,6 +170,10 @@ body{
 	width: 100%;
 	height: 100%;
 }
+b{
+	font-size: 20px; font-size: ${font3}vmax;
+    vertical-align: super;
+}
 div{
 	font-family:Gotham, "Helvetica Neue", Helvetica, Arial, sans-serif;
 	font-size: 20px;
@@ -177,38 +183,40 @@ div{
 }
 #icon{
 	margin-top: 6%;
-    margin-left: 2%;
+    margin-left: 4%;
 	font-size: 20px; font-size: ${font1}vmax;
 	text-align: center;
-	width: 100%;
+	width: 95%;
 	height: 55%;
 }
-#temp1 {
+#temp1{
 	font-weight: bold;
 	text-align: left;
 	float: left;
 	width: 48%;
-	margin-top: -5%;
+	margin-top: -4%;
 	margin-left: 2%;
+    vertical-align: text-top;
 	font-size: 20px; font-size: ${font2}vmax;
 }
-#temp2 {
+#temp2{
 	font-weight: bold;
 	text-align: right;
 	float: right;
 	width: 48%;
-	margin-top: -5%;
+	margin-top: -4%;
 	margin-right: 2%;
+    vertical-align: text-top;
 	font-size: 20px; font-size: ${font2}vmax;
 }
-#cond {
+#cond{
 	white-space: nowrap;
 	font-weight: bold;
-	margin-top: -3%;
-	text-align: left;
+	margin-top: -4%;
+	text-align: right;
+    vertical-align: middle;
 	float: left;
-	width: 96%;
-	margin-left: 2%;
+	width: 100%;
 	font-size: 20px; font-size: ${font3}vmax;
 }
 </style>
@@ -243,18 +251,18 @@ div{
 <script type="text/javascript">
 \$(document).ready(function(){
 	weatherData = function () {
+    \$("#data").empty();
 		\$.getJSON("${generateURL("json")}",function(weather){
 		var content = '';
 			\$.each(weather.data, function(i,data){
 	    		content += '<div id="icon"><i class="wi wi-' + data.icon + '"></i></div>';
-	    		content += '<div id="temp1">' + data.temp1 + '</div>';
-	    		content += '<div id="temp2">' + data.temp2 + '</div>';
-    			content += '<div id="cond">' + data.cond + '</div>';
-                \$("#data").empty();
-    			\$(content).prependTo("#data");
+	    		content += '<div id="temp1">' + data.temp1 + '°<b>${temperatureScale}</b></div>';
+	    		content += '<div id="temp2">' + data.temp2 + '°<b>${temperatureScale}</b></div>';
+    			content += '<div id="cond">' + data.cond + '&nbsp;</div>';
+    			\$(content).appendTo("#data");
     		});
     	});
-    	setTimeout(weatherData, 600000);
+    	setTimeout(weatherData, 480000);
 	}
 	weatherData();
 });
@@ -310,8 +318,7 @@ weatherRefresh()
         ]
 
 	def icon = weatherIcons[outsideWeather.currentValue("weatherIcon")]
-	def temperatureScale = getTemperatureScale()
-"""{"data": [{"icon":"${icon}","cond":"${outsideWeather.currentValue("weather")}","temp1":"${outsideWeather.currentValue("temperature")}°${temperatureScale}","temp2":"${insideTemp.currentValue("temperature")}°${temperatureScale}"}]}"""
+"""{"data": [{"icon":"${icon}","cond":"${outsideWeather.currentValue("weather")}","temp1":"${insideTemp.currentValue("temperature")}","temp2":"${outsideWeather.currentValue("temperature")}"}]}"""
 }
 
 private def generateURL(data) {    
@@ -329,7 +336,7 @@ private def generateURL(data) {
 }
 
 private def textVersion() {
-    def text = "Version 1.2"
+    def text = "Version 1.3"
 }
 
 private def textCopyright() {
