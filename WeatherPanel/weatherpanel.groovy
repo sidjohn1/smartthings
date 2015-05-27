@@ -76,7 +76,6 @@ mappings {
 	}
 }
 
-
 def installed() {
 	log.debug "Installed with settings: ${settings}"
 	initialize()
