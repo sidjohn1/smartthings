@@ -65,11 +65,11 @@ def pageConf() {
 			input "senors", "device.PlantlinkDirectSensor", title: "PlantLink-Direct...", multiple: true, required: true
 		}
 		section("Select events to to recieve notifications for..."){
-        	input "sendPush", "enum", title: "Push?", options: ["Yes", "No"], required: false, defaultValue: "Yes"
-            input "sendSMS", "phone", title: "SMS?", required: false
-            input "sendTooDry", "enum", title: "Too Dry?", options: ["Yes", "No"], required: false, defaultValue: "Yes"
+			input "sendPush", "enum", title: "Push?", options: ["Yes", "No"], required: false, defaultValue: "Yes"
+			input "sendSMS", "phone", title: "SMS?", required: false
+			input "sendTooDry", "enum", title: "Too Dry?", options: ["Yes", "No"], required: false, defaultValue: "Yes"
 			input "sendTooWet", "enum", title: "Too Wet?", options: ["Yes", "No"], required: false, defaultValue: "No"
-            input "sendTime", "time", title: "At what time?", required: true
+			input "sendTime", "time", title: "At what time?", required: true
 		}
 	}
 }
@@ -92,22 +92,23 @@ def initialize() {
 
 def sendStatus() {
 	log.trace "Checking Plants"
-    sendEvent(linkText:app.label, name:"sendStatus", descriptionText:"Checking Plants", eventType:"SOLUTION_EVENT", displayed: true)
-    settings.senors.each() {
-        try {
-        	log.trace "${it.displayName} is ${it.currentStatus}"
+	sendEvent(linkText:app.label, name:"sendStatus", descriptionText:"Checking Plants", eventType:"SOLUTION_EVENT", displayed: true)
+	settings.senors.each() {
+		try {
+			log.trace "${it.displayName} is ${it.currentStatus}"
 			sendEvent(linkText:app.label, name:"${it.displayName}", value:"${it.currentStatus} at ${it.currentHumidity}%", descriptionText:"${it.displayName} is ${it.currentStatus} at ${it.currentHumidity}", eventType:"SOLUTION_EVENT", displayed: true)
-            if (it.currentStatus == "Too Wet" && settings.sendTooWet == "Yes") {
-                send("${it.displayName} is ${it.currentStatus}")
-            }
+			if (it.currentStatus == "Too Wet" && settings.sendTooWet == "Yes") {
+				send("${it.displayName} is ${it.currentStatus}")
+			}
 			if (it.currentStatus == "Too Dry" && settings.sendTooDry == "Yes") {
-                send("${it.displayName} is ${it.currentStatus}")
-            }
-        } catch (e) {
-            log.trace "Error checking status"
-            log.trace e
-        }
-    }
+				send("${it.displayName} is ${it.currentStatus}")
+			}
+		}
+		catch (e) {
+			log.trace "Error checking status"
+			log.trace e
+		}
+	}
 }
 
 def send(msg) {
