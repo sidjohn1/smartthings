@@ -1,0 +1,13 @@
+{
+  "name": "Weather Panel",
+  "icons": [
+    {
+      "src": "https://sidjohn1.github.io/smartthings/WeatherPanel/index.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "density": 1.0
+    }
+  ],
+  "display": "fullscreen",
+  "orientation": "landscape"
+}
