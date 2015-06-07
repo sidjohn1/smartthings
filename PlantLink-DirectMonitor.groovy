@@ -40,11 +40,11 @@ def pageInfo() {
 		paragraph "PlantLink-Direct Monitor, Monitors your Plantlinks via Kristopher Kubicki's plantlink-direct devicetype, and sends notifacations when your plants need water."
 		paragraph "${textVersion()}\n${textCopyright()}"
 		}
-        def plantlist = ""
-		settings.senors.each() {
-            try {
+		def plantlist = ""
+			settings.senors.each() {
+			try {
 				plantlist += "$it.displayName is $it.currentStatus at $it.currentHumidity%\n"
-            } catch (e) {
+			} catch (e) {
                 log.trace "Error checking status."
                 log.trace e
             }
