@@ -32,7 +32,7 @@ Select Create and your done creating a weather station!<br>
   (http://sidjohn1.github.io/smartthings/WeatherPanel/dropbox2.png)
   <li>Create a file called index.json in your Public > Wallpaper folder</li>
   Mac Users can use (create-index.json.sh) to automate the process<br>
-  Windows Users can use (http://sidjohn1.github.io/smartthings/WeatherPanel/index1.json) or (http://sidjohn1.github.io/smartthings/WeatherPanel/index2.json) as an example. Replace 00-09.jpg with the actual filename and add addition entries as needed. Just be sure there is no "," after the last "}".
+  Windows Users can use (http://sidjohn1.github.io/smartthings/WeatherPanel/index1.json) or (http://sidjohn1.github.io/smartthings/WeatherPanel/index2.json) as an example. Replace 00-05.jpg with the actual filename and add addition entries as needed. Just be sure there is no "," after the last "}".
 </ol>
 <h2>General FAQ:</h2>
 See: https://github.com/sidjohn1/smartthings (Scroll to the bottom)
