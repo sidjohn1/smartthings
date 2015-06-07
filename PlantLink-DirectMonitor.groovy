@@ -96,7 +96,7 @@ def sendStatus() {
     settings.senors.each() {
         try {
         	log.trace "${it.displayName} is ${it.currentStatus}"
-			sendEvent(linkText:app.label, name:"${it.displayName}", value:"${it.currentStatus} at ${it.currentHumidity}%", descriptionText:"${it.displayName} is ${it.currentStatus} at ${it.settings.humidity}", eventType:"SOLUTION_EVENT", displayed: true)
+			sendEvent(linkText:app.label, name:"${it.displayName}", value:"${it.currentStatus} at ${it.currentHumidity}%", descriptionText:"${it.displayName} is ${it.currentStatus} at ${it.currentHumidity}", eventType:"SOLUTION_EVENT", displayed: true)
             if (it.currentStatus == "Too Wet" && settings.sendTooWet == "Yes") {
                 send("${it.displayName} is ${it.currentStatus}")
             }
