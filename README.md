@@ -6,7 +6,7 @@ If you find this code usefull, please support the developer via PayPal:<br/> [![
 
 <h2>Details:</h2>
 <b>WeatherPanel:</b> Smartthings smartapp that displays inside and outside temp and weather infomation as a web page. Also has a random customizable background serviced by Dropbox public folders.<br>
-<b>PlantLink-DirectMonitor.groovy</b> Monitors your Plantlinks via Kristopher Kubicki's plantlink-direct devicetype, and sends notifacations when your plants need water.<br>
+<b>PlantLink-DirectMonitor.groovy</b> Monitors your Plantlinks via [Kristopher Kubicki's plantlink-direct devicetype](https://github.com/KristopherKubicki/device-plantlink-direct) , and sends notifacations when your plants need water.<br>
 <b>SmartTurnItOn.groovy:</b> Turns on a device at a set time on set day(s) of the week on if a persons presense is detected. Also turns the device off after a set time<br>
 <b>ThermostatAutoAway.groovy:</b> Smartthings smartapp that sets a thermostat to "Away" when presence(s) are no longer detected<br>
 <b>ThermostatAutoHome.groovy:</b> Smartthings smartapp that sets a thermostat to "Home" when presence(s) are detected<br>
