@@ -22,12 +22,11 @@ definition(
     name: "PlantLink-Direct Monitor",
     namespace: "sidjohn1",
     author: "Sidney Johnson",
-    description: "Monitors plantlink sencors",
+    description: "Monitors plantlink senors, and sends notifacations when your plants need water",
     category: "Green Living",
     iconUrl: "http://cdn.device-icons.smartthings.com/Home/home10-icn.png",
     iconX2Url: "http://cdn.device-icons.smartthings.com/Home/home10-icn@2x.png",
     iconX3Url: "http://cdn.device-icons.smartthings.com/Home/home10-icn@3x.png")
-
 
 preferences {
     page name:"pageInfo"
