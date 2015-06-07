@@ -16,6 +16,7 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *	Version: 1.0 - Initial Version
+ *	Version: 1.01 - Added humidity to the display
  */
 definition(
     name: "PlantLink-Direct Monitor",
@@ -42,7 +43,7 @@ def pageInfo() {
         def plantlist = ""
 		settings.senors.each() {
             try {
-				plantlist += "$it.displayName is $it.currentStatus\n"
+				plantlist += "$it.displayName is $it.currentStatus at $it.currentHumidity%\n"
             } catch (e) {
                 log.trace "Error checking status."
                 log.trace e
@@ -89,6 +90,7 @@ def updated() {
 }
 
 def initialize() {
+	log.info "PlantLink-Direct Monitor ${textVersion()} ${textCopyright()}"
 	schedule(settings.sendTime, sendStatus)
 }
 
@@ -98,7 +100,7 @@ def sendStatus() {
     settings.senors.each() {
         try {
         	log.trace "${it.displayName} is ${it.currentStatus}"
-			sendEvent(linkText:app.label, name:"sendStatus", descriptionText:"${it.displayName} is ${it.currentStatus}", eventType:"SOLUTION_EVENT", displayed: true)
+			sendEvent(linkText:app.label, name:"${it.displayName}", value:"${it.currentStatus} at ${it.currentHumidity}%", descriptionText:"${it.displayName} is ${it.currentStatus} at ${it.settings.humidity}", eventType:"SOLUTION_EVENT", displayed: true)
             if (it.currentStatus == "Too Wet" && settings.sendTooWet == "Yes") {
                 send("${it.displayName} is ${it.currentStatus}")
             }
@@ -127,7 +129,7 @@ def send(msg) {
 }
 
 private def textVersion() {
-    def text = "Version 1.0"
+    def text = "Version 1.01"
 }
 
 private def textCopyright() {
