@@ -70,20 +70,17 @@ def pageConf() {
             input "sendTooDry", "enum", title: "Too Dry?", options: ["Yes", "No"], required: false, defaultValue: "Yes"
 			input "sendTooWet", "enum", title: "Too Wet?", options: ["Yes", "No"], required: false, defaultValue: "No"
             input "sendTime", "time", title: "At what time?", required: true
-            
 		}
 	}
 }
 
 def installed() {
 	log.trace "Installed with settings: ${settings}"
-
 	initialize()
 }
 
 def updated() {
 	log.trace "Updated with settings: ${settings}"
-
 	unsubscribe()
 	initialize()
 }
