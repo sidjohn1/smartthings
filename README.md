@@ -14,7 +14,7 @@ If you find this code usefull, please support the developer via PayPal:<br/> [![
 <b>ThinkingCleanerer.groovy:</b> Thinking Cleaner(Roomba) smartapp for Smartthings<br>
 <b>TurnItOffWhenNotInUse.groovy:</b> Smartthings smartapp that monitors a Smart Power Outlet(powermeter) to turn off a device at a set time if the power usage is below a set point. Can also turn it back on at a set time<br>
 <b>Lights On, On Vibration.groovy:</b> Smartthings smartapp that turns on and back off a light when a sensor is vibrated. This app works well with a Smartsence Multi attached to your doorbell to detect when it has rung. The vibration of the ring will trigger the selected light to turn on.
-<a id="FAQ" href="#FAQ"></a><h2>FAQ:</h2>
+<h2>FAQ:</h2>
 <b>How do i add a smartapp to Smartthings?</b>
 <ol type="1">
   <li>Goto "https://graph.api.smartthings.com/ide/app/create" in your browser</li>
