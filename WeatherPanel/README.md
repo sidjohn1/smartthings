@@ -11,6 +11,8 @@ Weather data is only pulled from the Smartthings default WeatherStation Tile. Th
 </ol>
 Select Create and your done creating a weather station!<br>
 <b>Having this device installed is a requirement for this app to function.</b>
+<h2>General FAQ:</h2>
+See: https://github.com/sidjohn1/smartthings (Scroll to the bottom)
 <h2>Instalation</h2>
 <ol>
   <li>Copy the code from weatherpanel.groovy into a new smart app</li>
@@ -35,7 +37,5 @@ Select Create and your done creating a weather station!<br>
   Mac Users can use (create-index.json.sh) to automate the process<br>
   Windows Users can use (http://sidjohn1.github.io/smartthings/WeatherPanel/index1.json) or (http://sidjohn1.github.io/smartthings/WeatherPanel/index2.json) as an example. Replace 00-05.jpg with the actual filename and add addition entries as needed. Just be sure there is no "," after the last "}".
 </ol>
-<h2>General FAQ:</h2>
-See: https://github.com/sidjohn1/smartthings (Scroll to the bottom)
 
 
