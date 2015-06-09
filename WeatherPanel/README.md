@@ -13,7 +13,7 @@ Weather data is only pulled from the Smartthings default WeatherStation Tile. Th
 Select Create and your done creating a weather station!<br>
 <b>Having this device installed is a requirement for this app to function.</b>
 <h2>General FAQ:</h2>
-See: https://github.com/sidjohn1/smartthings (Scroll to the bottom)<br>
+See: https://github.com/sidjohn1/smartthings/blob/master/README.md#faq<br>
 <b>If the installation steps arent clear this is a good place to start.</b>
 <h2>Instalation</h2>
 <ol>
