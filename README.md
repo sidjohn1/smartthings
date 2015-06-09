@@ -18,6 +18,7 @@ If you find this code usefull, please support the developer via PayPal:<br/> [![
 <b>How do i add a smartapp to Smartthings?</b>
 <ol type="1">
   <li>Goto "https://graph.api.smartthings.com/ide/app/create" in your browser</li>
+  <li>If the app requires OAuth Click "Enable OAuth in Smart App"</li>
   <li>Click "From Code"</li>
   <li>Copy all text from .groovy file and paste into text box (RAW makes this easier)</li>
   <li>Click "Create"</li>
