@@ -1,5 +1,7 @@
 <h1>Timely Presence</h1>
 Timely Presence displays the current local time and the presence of the members of the house as the background.<br>Once installed use the link to run it as a webapp on Andriod, IOS, or any desktop browser. On Andriod devices i highly recomend using "Full Screen Browser" from the Play Store to get rid of the navigation and status bars. (https://play.google.com/store/apps/details?id=tk.klurige.fullscreenbrowser)
+<h2>General FAQ:</h2>
+See: https://github.com/sidjohn1/smartthings (Scroll to the bottom)
 <h2>Instalation</h2>
 <ol>
   <li>Select images to represent the members of your family</li>
@@ -24,5 +26,3 @@ Timely Presence displays the current local time and the presence of the members 
   <li>Select a picture and click "Copy public link"</li>
   <li>Copy the everything but the filename ie dad.jpg The url should start with https:// and end with /</li>
 </ol>
-<h2>General FAQ:</h2>
-See: https://github.com/sidjohn1/smartthings (Scroll to the bottom)
