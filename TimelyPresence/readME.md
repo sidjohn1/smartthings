@@ -24,5 +24,5 @@ See: https://github.com/sidjohn1/smartthings (Scroll to the bottom)
   <li>Create a Family folder inside your Public Folder</li>
   <li>Upload the pictures to your Public > Family folder</li>
   <li>Select a picture and click "Copy public link"</li>
-  <li>Copy the everything but the filename ie dad.jpg The url should start with https:// and end with /</li>
+  <li>Copy the everything but the filename ie dad.jpg The url should start with https:// and end with /<br>This is your Picture Folder URL</li>
 </ol>
