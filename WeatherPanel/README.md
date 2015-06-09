@@ -14,6 +14,7 @@ Select Create and your done creating a weather station!<br>
 <h2>Instalation</h2>
 <ol>
   <li>Copy the code from weatherpanel.groovy into a new smart app</li>
+  <li>Besure to enable OAuth</li>
   <li>Install the Weather Panel smartapp in the smartthings app </li>
   <li>Select Inside/Outside Temp Devices</li>
   <li>Select View URL and copy the URL into a broswer</li>
