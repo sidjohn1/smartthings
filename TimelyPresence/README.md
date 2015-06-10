@@ -1,5 +1,6 @@
 <h1>Timely Presence</h1>
-Timely Presence displays the current local time and the presence of the members of the house as the background.<br>Once installed use the link to run it as a webapp on Andriod, IOS, or any desktop browser. On Andriod devices i highly recomend using "Full Screen Browser" from the Play Store to get rid of the navigation and status bars. (https://play.google.com/store/apps/details?id=tk.klurige.fullscreenbrowser)
+Timely Presence displays the current local time and the presence of the members of the house as the background.<br>Once installed use the link to run it as a webapp on Andriod, IOS, or any desktop browser. On Andriod devices i highly recomend using "Full Screen Browser" from the Play Store to get rid of the navigation and status bars. (https://play.google.com/store/apps/details?id=tk.klurige.fullscreenbrowser)<br>
+<img src='http://sidjohn1.github.io/smartthings/TimelyPresence/screenshot1.gif'>
 <h2>General FAQ:</h2>
 See: https://github.com/sidjohn1/smartthings/blob/master/README.md#faq<br>
 <b>If the installation steps arent clear this is a good place to start.</b>
