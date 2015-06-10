@@ -7,7 +7,7 @@ If you find this code usefull, please support the developer via PayPal:<br/> [![
 <h2>Details:</h2>
 <b>TimelyPresence:</b> Smartthings smartapp that displays the current local time and the presence of the members of the house as the background. Images change from greyscale to color indicating presence<br>
 <b>WeatherPanel:</b> Smartthings smartapp that displays inside and outside temp and weather infomation as a web page. Also has a random customizable background serviced by Dropbox public folders.<br>
-<b>Lights On, On Vibration.groovy:</b> Smartthings smartapp that turns on and back off a light when a sensor is vibrated. This app works well with a Smartsence Multi attached to your doorbell to detect when it has rung. The vibration of the ring will trigger the selected light to turn on.
+<b>Lights On, On Vibration.groovy:</b> Smartthings smartapp that turns on and back off a light when a sensor is vibrated. This app works well with a Smartsence Multi attached to your doorbell to detect when it has rung. The vibration of the ring will trigger the selected light to turn on.<br>
 <b>PlantLink-DirectMonitor.groovy</b> Monitors your Plantlinks via [Kristopher Kubicki's plantlink-direct devicetype](https://github.com/KristopherKubicki/device-plantlink-direct) , and sends notifacations when your plants need water.<br>
 <b>SmartTurnItOn.groovy:</b> Turns on a device at a set time on set day(s) of the week on if a persons presense is detected. Also turns the device off after a set time<br>
 <b>SmartWeatherStationExtended.groovy:</b> Smartthings devicetype, adds Moon Phase and 3 day weather forcast info. Compatible with Weather Panel 1.4 and later.<br>
