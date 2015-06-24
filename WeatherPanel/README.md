@@ -1,17 +1,6 @@
 <h1>Weather Panel</h1>
 Weather Panel displays inside and outside temp and weather infomation as a web page. Also has a random customizable background serviced by Dropbox public folders.<br>Once installed use the link to run it as a webapp on Andriod, IOS, or any desktop browser. On Andriod devices i highly recomend using "Full Screen Browser" from the Play Store to get rid of the navigation and status bars. (https://play.google.com/store/apps/details?id=tk.klurige.fullscreenbrowser)<br>
-<img src='http://sidjohn1.github.io/smartthings/WeatherPanel/screenshot1.jpg'>
-<h2>Getting the Weather:</h2>
-Weather data is only pulled from the Smartthings default WeatherStation Tile. This can be added from:
-(https://graph.api.smartthings.com) > My Devices > + New Device >
-<ol>
-  <li>Give it a name, "Weather Station" will work fine</li>
-  <li>For "Device Network Id" give it a unique value, I used Weather01</li>
-  <li>For the Type select SmartWeather Station Tile</li>
-  <li>Select values for both location and hub</li>
-</ol>
-Select Create and your done creating a weather station!<br>
-<b>Having this device installed is a requirement for this app to function.</b>
+<img src='http://sidjohn1.github.io/smartthings/WeatherPanel/screenshot1.gif'>
 <h2>General FAQ:</h2>
 See: https://github.com/sidjohn1/smartthings/blob/master/README.md#faq<br>
 <b>If the installation steps arent clear this is a good place to start.</b>
