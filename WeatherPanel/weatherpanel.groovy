@@ -17,6 +17,7 @@
  *	Version: 1.1 - Fixed font size not changing the font size
  *	Version: 1.2 - Decoupled weather data refresh from wallpaper refresh
  *	Version: 1.3 - Minor formating tweaks, removed all static data from json
+ *	Version: 2.0 - Addeded 3 day forcast and more formating and presentation tweaks. Removed weather station requirement
  *
  */
 definition(
@@ -31,16 +32,24 @@ definition(
     oauth: true)
 
 preferences {
-	page(name: "selectDevices", install: true, uninstall: true) {
+    page(name: "selectDevices")
+    page(name: "viewURL")
+}
+
+def selectDevices() {
+	dynamicPage(name: "selectDevices", install: true, uninstall: true) {
 	    section("About") {
 			paragraph "Weather Panel displays inside and outside temp and weather infomation as a web page. Also has a random customizable background serviced by Dropbox public folders."
 			paragraph "${textVersion()}\n${textCopyright()}"
  	   }
 		section("Select...") {
 			input "insideTemp", "capability.temperatureMeasurement", title: "Inside Tempature...", multiple: false, required: true
-			input "outsideWeather", "device.smartweatherStationTile", title: "Outside Weather...", multiple: false, required: true
-			input "fontSize", "enum", title:"Select Font Size", required: true, multiple:false, defaultValue: "Large", metadata: [values: ['Small','Medium','Large']]
-			input "fontColor", "enum", title:"Select Font Color", required: true, multiple:false, defaultValue: "White", metadata: [values: ['White','Black']]
+			input "showForcast", "bool", title:"Show Forcast", required: false, multiple:false
+		}
+		section(hideable: true, hidden: true, "Optional Settings") {
+        	input "fontColor", "bool", title: "Font Color Black", required: false
+			input "fontSize", "enum", title:"Select Font Size", required: true, multiple:false, defaultValue: "Medium", metadata: [values: ['Small','Medium','Large']]
+			input "outsideWeather", "capability.temperatureMeasurement", title: "Clear to free weather device", multiple: true, required: false
 		}
 		section("Dropbox Wallpaper") {
 			input "dbuid", "number", title: "Dropbox Public UID",defaultValue: "57462297", required:false
@@ -49,7 +58,6 @@ preferences {
 			href "viewURL", title: "View URL"
 		}
 	}
-    page(name: "viewURL")
 }
 
 def viewURL() {
@@ -61,7 +69,6 @@ def viewURL() {
 		}
 	}
 }
-
 
 mappings {
     path("/html") {
@@ -83,6 +90,7 @@ def installed() {
 
 def updated() {
 	log.debug "Updated with settings: ${settings}"
+    unschedule()
 	unsubscribe()
 	initialize()
 }
@@ -90,13 +98,6 @@ def updated() {
 def initialize() {
 	log.info "Weather Panel ${textVersion()} ${textCopyright()}"
     generateURL()
-    weatherRefresh()
-}
-
-def weatherRefresh() {
-	log.debug "refreshing weather"
-	outsideWeather?.refresh()
-    insideTemp?.poll()
 }
 
 def generateHtml() {
@@ -109,40 +110,62 @@ def generateJson() {
 
 def head() {
 
-def font1 = ""
-def font2 = ""
-def font3 = ""
-def color1 = ""
-def color2 = ""
+def color1
+def color2
+def font1
+def font2
+def font3
+def iconW
+def temp1TA
 def temperatureScale = getTemperatureScale()
+def weatherDataContent
 
 switch (fontSize) {
 	case "Large":
-	font1 = "42"
-	font2 = "14"
-	font3 = "7"
+	font1 = "50"
+	font2 = "20"
+	font3 = "10"
 	break;
 	case "Medium":
-	font1 = "41"
-	font2 = "13"
-	font3 = "6"
+	font1 = "48"
+	font2 = "18"
+	font3 = "10"
 	break;
 	case "Small":
-	font1 = "40"
-	font2 = "12"
-	font3 = "5"
+	font1 = "46"
+	font2 = "16"
+	font3 = "10"
 	break;
 }
 
-switch (fontColor) {
-	case "White":
-	color1 = "white"
-	color2 = "black"
-	break;
-	case "Black":
-	color1 = "black"
-	color2 = "white"
-	break;
+if (settings.fontColor) {
+	color1 = "0,0,0"
+	color2 = "255,255,255"
+}
+else {
+	color1 = "255,255,255"
+	color2 = "0,0,0"
+}
+
+
+if (showForcast == true) {
+	iconW = "47"
+	temp1TA = "right"
+	weatherDataContent = """	    		content += '<div id="icon"><i class="wi wi-' + item.icon + '"></i></div>';
+	    		content += '<div id="temp1" class="text3"><p>' + item.temp1 + '°<b>${temperatureScale}<br>Inside</b><br>' + item.temp2 + '°<b>${temperatureScale}<br>Outside</b><br></p></div>';
+    			content += '<div id="cond" class="text2"><p>' + item.cond + '&nbsp;</p></div>';
+    			content += '<div id="forecast" class="text3"><p>' + item.forecastDay + '<br><i class="wi wi-' + item.forecastIcon + '"></i>&nbsp;' + item.forecastDayHigh + '<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>' + item.forecastDayLow + '</u></p><br></div>';
+    			content += '<div id="forecast" class="text3"><p>' + item.forecastDay1 + '<br><i class="wi wi-' + item.forecastIcon1 + '"></i>&nbsp;' + item.forecastDayHigh1 + '<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>' + item.forecastDayLow1 + '</u></p><br></div>';
+    			content += '<div id="forecast" class="text3"><p>' + item.forecastDay2 + '<br><i class="wi wi-' + item.forecastIcon2 + '"></i>&nbsp;' + item.forecastDayHigh2 + '<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>' + item.forecastDayLow2 + '</u></p><br></div>';
+    			content += '<div id="forecast" class="text3"><p>' + item.forecastDay3 + '<br><i class="wi wi-' + item.forecastIcon3 + '"></i>&nbsp;' + item.forecastDayHigh3 + '<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>' + item.forecastDayLow3 + '</u></p><br></div>';"""
+}
+   else {
+	iconW = "100"
+	temp1TA = "left"
+   	weatherDataContent = """	    		content += '<div id="icon"><i class="wi wi-' + item.icon + '"></i></div>';
+	    		content += '<div id="temp1" class="text1"><p>' + item.temp1 + '°<b>${temperatureScale}<br>Inside</b></p></div>';
+	    		content += '<div id="temp2" class="text1"><p>' + item.temp2 + '°<b>${temperatureScale}<br>Outside</b></p></div>';
+    			content += '<div id="cond" class="text1"><p>' + item.cond + '&nbsp;</p></div>';"""
 }
 
 """<!-- Meta Data -->
@@ -156,70 +179,112 @@ switch (fontColor) {
 	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<meta name="mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-	<meta name="viewport" content = "width = device-width, initial-scale = 1.0, maximum-scale=1.0, user-scalable=0" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 	<link rel="apple-touch-icon-precomposed" href="https://sidjohn1.github.io/smartthings/WeatherPanel/index.png" />
 <!-- Stylesheets -->
 <style type="text/css">
 body{
 	background-size: cover;
 	background-attachment: fixed;
-	background-color: ${color2};
-	overflow:hidden;
-	margin:0 0;
+	background-color: rgb(${color2});
+	background-position: center;
+	overflow: hidden;
+	margin: 0 0;
 	width: 100%;
 	height: 100%;
 }
 b{
-	font-size: 20px; font-size: ${font3}vmax;
-    vertical-align: super;
+	font-size: 20px;
+	font-size: ${font3}vh;
+	vertical-align: super;
+}
+p{
+	font-family:Gotham, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	color: rgb(${color1});
+	text-shadow: 2px 1px 0px rgb(${color2});
+	margin:0 0;
+	opacity: 0.9;
+}
+i{
+	color: rgb(${color1});
+	text-shadow: 2px 1px 0px rgb(${color2});
+	vertical-align: middle;
+	opacity: 0.9;
 }
 div{
-	font-family:Gotham, "Helvetica Neue", Helvetica, Arial, sans-serif;
-	font-size: 20px;
-	color: ${color1};
-	text-shadow: 2px 1px 0px ${color2};
-	margin:0 0;
+	background: transparent;
+}
+u{
+	text-decoration: overline;
+}
+.text1 {
+	font-weight: bold;
+	vertical-align: text-top;
+	margin-top: -3%;
+}
+.text2 {
+	font-weight: bold;
+	vertical-align: super;
+	margin-top: -3%;
+	margin-bottom: 1%;
+}
+.text3 {
+	font-weight: bold;
+	vertical-align: super;
+}
+#data {
+	display: flex;
+	display: -webkit-flex;
+	flex-direction: row;
+	-webkit-flex-direction: row;
+	flex-wrap: wrap;
+	-webkit-flex-wrap: wrap;
 }
 #icon{
-	margin-top: 6%;
-    margin-left: 4%;
-	font-size: 20px; font-size: ${font1}vmax;
+	margin: 2% 1%;
+	font-size: 20px;
+	font-size: ${font1}vh;
 	text-align: center;
-	width: 95%;
-	height: 55%;
+	width: ${iconW}%;
 }
 #temp1{
-	font-weight: bold;
-	text-align: left;
+	text-align: ${temp1TA};
 	float: left;
 	width: 48%;
-	margin-top: -4%;
 	margin-left: 2%;
-    vertical-align: text-top;
-	font-size: 20px; font-size: ${font2}vmax;
+	font-size: 20px;
+	font-size: ${font2}vh;
+	line-height: 13vh;
 }
 #temp2{
-	font-weight: bold;
 	text-align: right;
 	float: right;
 	width: 48%;
-	margin-top: -4%;
 	margin-right: 2%;
-    vertical-align: text-top;
-	font-size: 20px; font-size: ${font2}vmax;
+	font-size: 20px;
+	font-size: ${font2}vh;
+	line-height: 13vh;
 }
 #cond{
 	white-space: nowrap;
-	font-weight: bold;
-	margin-top: -4%;
 	text-align: right;
-    vertical-align: middle;
-	float: left;
 	width: 100%;
-	font-size: 20px; font-size: ${font3}vmax;
+	font-size: 20px;
+	font-size: ${font3}vh;
+}
+#forecast{
+	white-space: nowrap;
+	text-align: center;
+	width: 25%;
+	font-size: 20px;
+	font-size: 7vh;
+	background: rgba(${color2},.5);
+	vertical-align: middle;
 }
 </style>
 <link type="text/css" rel="stylesheet" href="https://sidjohn1.github.io/smartthings/WeatherPanel/index.css"/>
+<link rel="shortcut icon" type="image/png" href="https://sidjohn1.github.io/smartthings/WeatherPanel/index.png"/>
+<link rel="manifest" href="https://sidjohn1.github.io/smartthings/WeatherPanel/manifest.json">
     <!-- Page Title -->
     <title>Weather Panel</title>
   	<!-- Javascript -->
@@ -250,14 +315,11 @@ div{
 <script type="text/javascript">
 \$(document).ready(function(){
 	weatherData = function () {
-    \$("#data").empty();
 		\$.getJSON("${generateURL("json")}",function(weather){
 		var content = '';
-			\$.each(weather.data, function(i,data){
-	    		content += '<div id="icon"><i class="wi wi-' + data.icon + '"></i></div>';
-	    		content += '<div id="temp1">' + data.temp1 + '°<b>${temperatureScale}</b></div>';
-	    		content += '<div id="temp2">' + data.temp2 + '°<b>${temperatureScale}</b></div>';
-    			content += '<div id="cond">' + data.cond + '&nbsp;</div>';
+			\$.each(weather.data, function(i,item){
+${weatherDataContent}
+				\$("#data").empty();
     			\$(content).appendTo("#data");
     		});
     	});
@@ -274,50 +336,68 @@ def body() {
 }
 
 def jsonData(){
-weatherRefresh()
-	def weatherIcons = [
-        "chanceflurries" : "day-snow",
-        "chancerain" : "day-rain",
-        "chancesleet" : "day-rain-mix",
-        "chancesnow" : "day-snow",
-        "chancetstorms" : "day-thunderstorm",
-        "clear" : "day-sunny",
-        "cloudy" : "day-cloudy",
-        "flurries" : "day-snow",
-        "fog" : "day-fog",
-        "hazy" : "day-haze",
-        "mostlycloudy" : "day-cloudy",
-        "mostlysunny" : "day-sunny",
-        "partlycloudy" : "day-cloudy",
-        "partlysunny" : "day-cloudy",
-        "rain" : "day-rain",
-        "sleet" : "day-sleet",
-        "snow" : "day-snow",
-        "sunny" : "day-sunny",
-        "tstorms" : "day-thunderstorm",
-        "nt_chanceflurries" : "night-alt-snow",
-        "nt_chancerain" : "night-alt-rain",
-        "nt_chancesleet" : "night-alt-hail",
-        "nt_chancesnow" : "night-alt-snow",
-        "nt_chancetstorms" : "night-alt-thunderstorm",
-        "nt_clear" : "night-clear",
-        "nt_cloudy" : "night-alt-cloudy",
-        "nt_flurries" : "night-alt-snow",
-        "nt_fog" : "night-fog",
-        "nt_hazy" : "dust",
-        "nt_mostlycloudy" : "night-alt-cloudy",
-        "nt_mostlysunny" : "night-alt-cloudy",
-        "nt_partlycloudy" : "night-alt-cloudy",
-        "nt_partlysunny" : "night-alt-cloudy",
-        "nt_sleet" : "night-alt-rain-mix",
-        "nt_rain" : "night-alt-rain",
-        "nt_snow" : "night-alt-snow",
-        "nt_sunny" : "night-clear",
-        "nt_tstorms" : "night-alt-thunderstorm"
-        ]
+log.debug "refreshing weather"
+sendEvent(linkText:app.label, name:"weatherRefresh", value:"refreshing weather", descriptionText:"weatherRefresh is refreshing weather", eventType:"SOLUTION_EVENT", displayed: true)
 
-	def icon = weatherIcons[outsideWeather.currentValue("weatherIcon")]
-"""{"data": [{"icon":"${icon}","cond":"${outsideWeather.currentValue("weather")}","temp1":"${insideTemp.currentValue("temperature")}","temp2":"${outsideWeather.currentValue("temperature")}"}]}"""
+def current
+def currentTemp
+def forecast
+def forecastDayHigh
+def forecastDayHigh1
+def forecastDayHigh2
+def forecastDayHigh3
+def forecastDayLow
+def forecastDayLow1
+def forecastDayLow2
+def forecastDayLow3
+def temperatureScale = getTemperatureScale()
+
+def weatherIcons = []
+
+if (settings.zipcode) {
+	forecast = getWeatherFeature("forecast", settings.zipcode)
+	current = getWeatherFeature("conditions", settings.zipcode)
+}
+else {
+	forecast = getWeatherFeature("forecast")
+	current = getWeatherFeature("conditions")
+}
+if (temperatureScale == "F") {
+	currentTemp  = Math.round(current.current_observation.temp_f)
+	forecastDayHigh = forecast.forecast.simpleforecast.forecastday[0].high.fahrenheit
+	forecastDayHigh1 = forecast.forecast.simpleforecast.forecastday[1].high.fahrenheit
+	forecastDayHigh2 = forecast.forecast.simpleforecast.forecastday[2].high.fahrenheit
+	forecastDayHigh3 = forecast.forecast.simpleforecast.forecastday[3].high.fahrenheit
+	forecastDayLow = forecast.forecast.simpleforecast.forecastday[0].low.fahrenheit
+	forecastDayLow1 = forecast.forecast.simpleforecast.forecastday[1].low.fahrenheit
+	forecastDayLow2 = forecast.forecast.simpleforecast.forecastday[2].low.fahrenheit
+	forecastDayLow3 = forecast.forecast.simpleforecast.forecastday[3].low.fahrenheit
+}
+else {
+	currentTemp  = Math.round(current.current_observation.temp_c)
+	forecastDayHigh = forecast.forecast.simpleforecast.forecastday[0].high.celsius
+	forecastDayHigh1 = forecast.forecast.simpleforecast.forecastday[1].high.celsius
+	forecastDayHigh2 = forecast.forecast.simpleforecast.forecastday[2].high.celsius
+	forecastDayHigh3 = forecast.forecast.simpleforecast.forecastday[3].high.celsius
+	forecastDayLow = forecast.forecast.simpleforecast.forecastday[0].low.celsius
+	forecastDayLow1 = forecast.forecast.simpleforecast.forecastday[1].low.celsius
+	forecastDayLow2 = forecast.forecast.simpleforecast.forecastday[2].low.celsius
+	forecastDayLow3 = forecast.forecast.simpleforecast.forecastday[3].low.celsius
+}
+
+weatherIcons = ["chanceflurries" : "day-snow", "chancerain" : "day-rain", "chancesleet" : "day-rain-mix", "chancesnow" : "day-snow", "chancetstorms" : "day-thunderstorm", "clear" : "day-sunny", "cloudy" : "day-cloudy", "flurries" : "day-snow", "fog" : "day-fog", "hazy" : "day-haze", "mostlycloudy" : "day-cloudy", "mostlysunny" : "day-sunny", "partlycloudy" : "day-cloudy", "partlysunny" : "day-cloudy", "rain" : "day-rain", "sleet" : "day-sleet", "snow" : "day-snow", "sunny" : "day-sunny", "tstorms" : "day-thunderstorm", "nt_chanceflurries" : "night-alt-snow", "nt_chancerain" : "night-alt-rain", "nt_chancesleet" : "night-alt-hail", "nt_chancesnow" : "night-alt-snow", "nt_chancetstorms" : "night-alt-thunderstorm", "nt_clear" : "night-clear", "nt_cloudy" : "night-alt-cloudy", "nt_flurries" : "night-alt-snow", "nt_fog" : "night-fog", "nt_hazy" : "dust", "nt_mostlycloudy" : "night-alt-cloudy", "nt_mostlysunny" : "night-alt-cloudy", "nt_partlycloudy" : "night-alt-cloudy", "nt_partlysunny" : "night-alt-cloudy", "nt_sleet" : "night-alt-rain-mix", "nt_rain" : "night-alt-rain", "nt_snow" : "night-alt-snow", "nt_sunny" : "night-clear", "nt_tstorms" : "night-alt-thunderstorm"]
+
+def forecastNow = weatherIcons[current.current_observation.icon]
+def forecastDayIcon = weatherIcons[forecast.forecast.simpleforecast.forecastday[0].icon]
+def forecastDay1Icon = weatherIcons[forecast.forecast.simpleforecast.forecastday[1].icon]
+def forecastDay2Icon = weatherIcons[forecast.forecast.simpleforecast.forecastday[2].icon]
+def forecastDay3Icon = weatherIcons[forecast.forecast.simpleforecast.forecastday[3].icon]
+
+"""{"data": [{"icon":"${forecastNow}","cond":"${current.current_observation.weather}","temp1":"${insideTemp.currentValue("temperature")}","temp2":"${currentTemp}"
+,"forecastDay":"${forecast.forecast.simpleforecast.forecastday[0].date.weekday_short}","forecastIcon":"${forecastDayIcon}","forecastDayHigh":"${forecastDayHigh}","forecastDayLow":"${forecastDayLow}"
+,"forecastDay1":"${forecast.forecast.simpleforecast.forecastday[1].date.weekday_short}","forecastIcon1":"${forecastDay1Icon}","forecastDayHigh1":"${forecastDayHigh1}","forecastDayLow1":"${forecastDayLow1}"
+,"forecastDay2":"${forecast.forecast.simpleforecast.forecastday[2].date.weekday_short}","forecastIcon2":"${forecastDay2Icon}","forecastDayHigh2":"${forecastDayHigh2}","forecastDayLow2":"${forecastDayLow2}"
+,"forecastDay3":"${forecast.forecast.simpleforecast.forecastday[3].date.weekday_short}","forecastIcon3":"${forecastDay3Icon}","forecastDayHigh3":"${forecastDayHigh3}","forecastDayLow3":"${forecastDayLow3}"}]}"""
 }
 
 private def generateURL(data) {    
@@ -335,7 +415,7 @@ private def generateURL(data) {
 }
 
 private def textVersion() {
-    def text = "Version 1.3"
+    def text = "Version 2.0"
 }
 
 private def textCopyright() {
