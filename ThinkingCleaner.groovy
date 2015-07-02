@@ -18,13 +18,13 @@
  *	Version: 1.0 - Initial Version
  *	Version: 1.1 - Fixed installed and updated functions
  *	Version: 1.2 - Added error tracking, and better icons, link state
- *	Version: 1.3 - Better error tracking, and the ability to change the default port (thx to sidhartha100)
+ *	Version: 1.3 - Better error tracking, error correction and the ability to change the default port (thx to sidhartha100)
  *
  */
 import groovy.json.JsonSlurper
 preferences {
     input("ip", "text", title: "IP Address", description: "Your Thinking Cleaner Address", required:true, displayDuringSetup:true)
-    input("port", "text", title: "Port", description: "Your Thinking Cleaner Port", defaultValue: "80", required:true, displayDuringSetup:true)
+    input("port", "number", title: "Port Number", description: "Your Thinking Cleaner Port Number", defaultValue: "80", required:true, displayDuringSetup:true)
 }
 
 metadata {
