@@ -18,13 +18,11 @@
  *	Version: 1.0 - Initial Version
  *	Version: 1.1 - Fixed installed and updated functions
  *	Version: 1.2 - Added error tracking, and better icons, link state
- *	Version: 1.3 - Better error tracking, error correction and the ability to change the default port (thx to sidhartha100)
  *
  */
 import groovy.json.JsonSlurper
 preferences {
-    input("ip", "text", title: "IP Address", description: "Your Thinking Cleaner Address", required:true, displayDuringSetup:true)
-    input("port", "number", title: "Port Number", description: "Your Thinking Cleaner Port Number", defaultValue: "80", required:true, displayDuringSetup:true)
+    input("ip", "text", title: "IP Address", description: "Your Thinking Cleaner Address")
 }
 
 metadata {
@@ -36,7 +34,7 @@ metadata {
 		capability "Tone"
         
         command "spot"
-
+        
         attribute "network","string"
 	}
 
@@ -138,45 +136,32 @@ def parse(String description) {
 					log.debug result.status.cleaner_state
                     }
 				break;
+                case "st_cleanstop":
+        		sendEvent(name: 'status', value: "waiting" as String)
+				break;
                 case "st_clean_spot":
-                	if (result.status.cleaning == "1"){
-                    sendEvent(name: 'status', value: "cleaning" as String)
-                	sendEvent(name: 'switch', value: "on" as String)
-					}
-                	else {
-                    sendEvent(name: 'status', value: "error" as String)
-                	sendEvent(name: 'switch', value: "on" as String)
-					log.debug result.status.cleaner_state
-                    }
+        		sendEvent(name: 'status', value: "cleaning" as String)
+                sendEvent(name: 'switch', value: "on" as String)
 				break;
                 case "st_clean_max":
-                	if (result.status.cleaning == "1"){
-                    sendEvent(name: 'status', value: "cleaning" as String)
-                	sendEvent(name: 'switch', value: "on" as String)
-					}
-                	else {
-                    sendEvent(name: 'status', value: "error" as String)
-                	sendEvent(name: 'switch', value: "on" as String)
-					log.debug result.status.cleaner_state
-                    }
+        		sendEvent(name: 'status', value: "cleaning" as String)
+                sendEvent(name: 'switch', value: "on" as String)
 				break;
                 case "st_dock":
-				if (result.status.cleaning == "1"){
-                    sendEvent(name: 'status', value: "docking" as String)
-                	sendEvent(name: 'switch', value: "on" as String)
-					}
-                	else {
-                    sendEvent(name: 'status', value: "error" as String)
-					log.debug result.status.cleaner_state
-                    }
         		sendEvent(name: 'status', value: "docking" as String)
+				break;
+                case "st_error":
+        		sendEvent(name: 'status', value: "error" as String)
 				break;
                 case "st_off":
                 sendEvent(name: 'switch', value: "off" as String)
                 sendEvent(name: 'status', value: "error" as String)
 				break;
-                default:
-				sendEvent(name: 'status', value: "error" as String)
+                case "st_pickup":
+        		sendEvent(name: 'status', value: "error" as String)
+				break;
+                case "st_wait":
+        		sendEvent(name: 'status', value: "waiting" as String)
 				break;
 			}
 			break;
@@ -210,13 +195,11 @@ def off() {
 	log.debug "Executing 'off'"
     api('off')
 }
-
 def spot() {
 	log.debug "Executing 'spot'"
     ipSetup()
 	api('spot')
 }
-
 def poll() {
 	log.debug "Executing 'poll'"
     api('refresh')
@@ -263,43 +246,39 @@ def api(String rooCommand, success = {}) {
         	rooPath = "/command.json?command=find_me"
             log.debug "The Beep Command was sent"
             break;
-	}
+}
 	def hubAction = ""
-    
-	switch (rooCommand) {
-		case "refresh":
-        case "beep":
-    		try {
-				hubAction = new physicalgraph.device.HubAction(
-				method: "GET",
-				path: rooPath,
-				headers: [HOST: "${ip}:${port}", Accept: "application/json"]
-        		)
-			}
-			catch (Exception e) {
-				log.debug "Hit Exception $e on $hubAction"
-			}
-			break;
-		default:
-			try {
-				hubAction = [new physicalgraph.device.HubAction(
-				method: "GET",
-				path: rooPath,
-				headers: [HOST: "${ip}:${port}", Accept: "application/json"]
-        		), delayAction(9900), api('refresh')]
-        	}
-			catch (Exception e) {
-				log.debug "Hit Exception $e on $hubAction"
-			}
-			break;
-	}
+	if (rooCommand != "refresh"){
+    	try {
+			hubAction = [new physicalgraph.device.HubAction(
+			method: "GET",
+			path: rooPath,
+			headers: [HOST: "${ip}:80", Accept: "application/json"]
+        	), delayAction(10000), api('refresh')]
+        }
+        catch (Exception e) {
+    	log.debug "Hit Exception $e on $hubAction"
+		}
+    }
+	else {
+    	try {
+			hubAction = new physicalgraph.device.HubAction(
+			method: "GET",
+			path: rooPath,
+			headers: [HOST: "${ip}:80", Accept: "application/json"]
+        	)
+		}
+        catch (Exception e) {
+    	log.debug "Hit Exception $e on $hubAction"
+		}
+    }
 	return hubAction
 }
 
 def ipSetup() {
 	if (settings.ip) {
  	def hosthex = convertIPtoHex(settings.ip)
-	def porthex = convertPortToHex(settings.port)
+	def porthex = convertPortToHex("80")
 	device.deviceNetworkId = "$hosthex:$porthex"
 //	log.debug "The device id configured is: $device.deviceNetworkId"
     }
