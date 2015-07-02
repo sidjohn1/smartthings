@@ -15,6 +15,7 @@
  *
  *	Version: 1.0 - Initial Version
  *	Version: 1.2 - Added error push notifcation, and better icons
+ *	Version: 1.3 - New interface, better polling, and logging. Added sms notifcations
  */
  
 definition(
@@ -29,72 +30,155 @@ definition(
 
 
 preferences {
-    section("Select a Roomba to monitor..."){
-		input "switch1", "device.ThinkingCleaner", title: "Monitored Roomba", required: true, multiple: false
-
-    }
-        section("Select events to be notified of..."){
-			input "sendRoombaOn", "enum", title: "Roomba On?", options: ["Yes", "No"], required: false, defaultValue: "No"
-            input "sendRoombaOff", "enum", title: "Roomba Off?", options: ["Yes", "No"], required: false, defaultValue: "No"
-            input "sendRoombaError", "enum", title: "Roomba Error?", options: ["Yes", "No"], required: false, defaultValue: "No"
-    }
+	page name:"pageInfo"
+}
+def pageInfo() {
+	return dynamicPage(name: "pageInfo", title: "Thinking Cleanerer", install: true, uninstall: true) {
+	section("About") {
+		paragraph "Thinking Cleaner(Roomba) smartapp for Smartthings. This app monitors you roomba and provides job notifacation"
+		paragraph "${textVersion()}\n${textCopyright()}"    
+	}
+		def roombaList = ""
+			settings.switch1.each() {
+			try {
+				roombaList += "$it.displayName is $it.currentStatus. Battery is $it.currentBattery%\n"
+			}
+            catch (e) {
+                log.trace "Error checking status."
+                log.trace e
+            }
+        }
+		if (roombaList) {
+			section("Roomba Status:") {
+				paragraph roombaList.trim()
+			}
+		}
+		section("Select Roomba(s) to monitor..."){
+			input "switch1", "device.ThinkingCleaner", title: "Monitored Roomba", required: true, multiple: true, submitOnChange: true
+		}
+		section(hideable: true, hidden: true, "Event Notifications..."){
+			input "sendPush", "bool", title: "Send as Push?", required: false, defaultValue: true
+			input "sendSMS", "phone", title: "Send as SMS?", required: false
+			input "sendRoombaOn", "bool", title: "Notify when on?", required: false, defaultValue: false
+            input "sendRoombaOff", "bool", title: "Notify when off?", required: false, defaultValue: false
+            input "sendRoombaError", "bool", title: "Notify on error?", required: false, defaultValue: false
+		}
+	}
 }
 
 def installed() {
-	sendEvent(descriptionText:"Installed with settings: ${settings}", eventType:"SOLUTION_EVENT", displayed: true)
-    log.trace "Installed with settings: ${settings}"
+	log.trace "Installed with settings: ${settings}"
 	initialize()
 }
 
 def updated() {
-	sendEvent(descriptionText:"Updated with settings: ${settings}", eventType:"SOLUTION_EVENT", displayed: true)
-    log.trace "Updated with settings: ${settings}"
-    unsubscribe()
-    unschedule("poll")
+	log.trace "Updated with settings: ${settings}"
+    unschedule()
+	unsubscribe()
 	initialize()
 }
 
 def initialize() {
+	log.info "Thinking Cleanerer ${textVersion()} ${textCopyright()}"
 	subscribe(switch1, "switch.on", eventHandler)
 	subscribe(switch1, "switch.off", eventHandler)
-    subscribe(switch1, "status.error", eventHandler)
+	subscribe(switch1, "status.error", eventHandler)
 }
 
 def eventHandler(evt) {
-	unschedule("poll")
     switch (evt.value) {
     	case "error":
-            sendEvent(descriptionText:"${switch1.displayName} has an error, polling every hour", eventType:"SOLUTION_EVENT", displayed: true)
-        	log.trace "${switch1.displayName} has an error, polling every hour"
-        	def msg = "${switch1.displayName} has an error"
-			schedule("0 0/60 * * * ?", "poll")
-            if (sendRoombaError == "Yes") {
-			sendPush(msg)
+			sendEvent(linkText:app.label, name:"${evt.displayName}", value:"error",descriptionText:"${evt.displayName} has an error", eventType:"SOLUTION_EVENT", displayed: true)
+			log.trace "${evt.displayName} has an error"
+			def msg = "${evt.displayName} has an error"
+			if (sendRoombaError == true) {
+				if (settings.sendSMS != null) {
+					sendSms(phoneNumber, msg) 
+				}
+				if (settings.sendPush == true) {
+					sendPush(msg)
+				}
 			}
+            schedule("39 0/15 * 1/1 * ?", pollErr)
 		break;
         
 		case "on":
-        	sendEvent(descriptionText:"${switch1.displayName} is on, polling every minute", eventType:"SOLUTION_EVENT", displayed: true)
-        	log.trace "${switch1.displayName} is on, polling every minute"
-            def msg = "${switch1.displayName} is on"
-        	schedule("0 0/1 * * * ?", "poll")
-			if (sendRoombaOn == "Yes") {
-			sendPush(msg)
+        	sendEvent(linkText:app.label, name:"${evt.displayName}", value:"on",descriptionText:"${evt.displayName} is on", eventType:"SOLUTION_EVENT", displayed: true)
+        	log.trace "${evt.displayName} is on"
+            def msg = "${evt.displayName} is on"
+        	schedule("15 0/1 * 1/1 * ?", pollOn)
+			if (sendRoombaOn == true) {
+				if (settings.sendSMS != null) {
+					sendSms(phoneNumber, msg) 
+				}
+				if (settings.sendPush == true) {
+					sendPush(msg)
+				}
 			}
 		break;
         
 		default:
-        	sendEvent(descriptionText:"${switch1.displayName} is off, polling every hour", eventType:"SOLUTION_EVENT", displayed: true)
-        	log.trace "${switch1.displayName} is off, polling every hour"
-			def msg = "${switch1.displayName} is off"
-        	schedule("0 0/60 * * * ?", "poll")
-			if (sendRoombaOff == "Yes") {
-				sendPush(msg)
+        	sendEvent(linkText:app.label, name:"${evt.displayName}", value:"off",descriptionText:"${evt.displayName} is off", eventType:"SOLUTION_EVENT", displayed: true)
+        	log.trace "${evt.displayName} is off"
+			def msg = "${evt.displayName} is off"
+			if (sendRoombaOff == true) {
+				if (settings.sendSMS != null) {
+					sendSms(phoneNumber, msg) 
+				}
+				if (settings.sendPush == true) {
+					sendPush(msg)
+				}
 			}
+			schedule("22 4 0/1 1/1 * ? *", pollOff)
 		break;
     }
 }
 
-def poll() {
-	switch1.poll()
+def pollOn() {
+	def onSwitch1 = switch1.currentSwitch.findAll { switchVal ->
+        switchVal == "on" ? true : false
+	}
+	settings.switch1.each() {
+    	if (it.currentSwitch == "on") {
+        	it.poll()
+    	}
+    }
+    if (onSwitch1.size() == 0) {
+        unschedule(pollOn)
+    }
+}
+
+def pollOff() {
+	def offSwitch1 = switch1.currentSwitch.findAll { switchVal ->
+        switchVal == "off" ? true : false
+	}
+	settings.switch1.each() {
+    	if (it.currentSwitch == "off") {
+        	it.poll()
+    	}
+    }
+    if (offSwitch1.size() == 0) {
+        unschedule(pollOff)
+    }
+}
+
+def pollErr() {
+	def errSwitch1 = switch1.currentStatus.findAll { switchVal ->
+        switchVal == "error" ? true : false
+	}
+	settings.switch1.each() {
+    	if (it.currentStatus == "error") {
+        	it.poll()
+    	}
+    }
+    if (errSwitch1.size() == 0) {
+        unschedule(pollErr)
+    }
+}
+private def textVersion() {
+    def text = "Version 1.3"
+}
+
+private def textCopyright() {
+    def text = "Copyright © 2014 Sidjohn1"
 }
