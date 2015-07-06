@@ -96,12 +96,12 @@ def parse(String description) {
 //		log.debug result.action
 		switch (result.action) {
 			case "command":
-			sendEvent(name: 'network', value: "Connected" as String)
+				sendEvent(name: 'network', value: "Connected" as String)
 			break;
 			case "status":
-            sendEvent(name: 'network', value: "Connected" as String)
-			sendEvent(name: 'battery', value: result.status.battery_charge as Integer)
-            switch (result.status.cleaner_state) {
+				sendEvent(name: 'network', value: "Connected" as String)
+				sendEvent(name: 'battery', value: result.status.battery_charge as Integer)
+			switch (result.status.cleaner_state) {
 				case "st_base":
 				sendEvent(name: 'status', value: "docked" as String)
 				sendEvent(name: 'switch', value: "off" as String)
@@ -133,29 +133,29 @@ def parse(String description) {
 						log.debug result.status.cleaner_state
 					}
 				break;
-                case "st_clean_spot":
-                	if (result.status.cleaning == "1"){
-                    sendEvent(name: 'status', value: "cleaning" as String)
-                	sendEvent(name: 'switch', value: "on" as String)
+				case "st_clean_spot":
+					if (result.status.cleaning == "1"){
+						sendEvent(name: 'status', value: "cleaning" as String)
+						sendEvent(name: 'switch', value: "on" as String)
 					}
-                	else {
-                    sendEvent(name: 'status', value: "error" as String)
-                	sendEvent(name: 'switch', value: "on" as String)
-					log.debug result.status.cleaner_state
-                    }
-				break;
-                case "st_clean_max":
-                	if (result.status.cleaning == "1"){
-                    sendEvent(name: 'status', value: "cleaning" as String)
-                	sendEvent(name: 'switch', value: "on" as String)
+					else {
+						sendEvent(name: 'status', value: "error" as String)
+						sendEvent(name: 'switch', value: "on" as String)
+						log.debug result.status.cleaner_state
 					}
-                	else {
-                    sendEvent(name: 'status', value: "error" as String)
-                	sendEvent(name: 'switch', value: "on" as String)
-					log.debug result.status.cleaner_state
-                    }
 				break;
-                case "st_dock":
+				case "st_clean_max":
+					if (result.status.cleaning == "1"){
+						sendEvent(name: 'status', value: "cleaning" as String)
+						sendEvent(name: 'switch', value: "on" as String)
+					}
+					else {
+						sendEvent(name: 'status', value: "error" as String)
+						sendEvent(name: 'switch', value: "on" as String)
+						log.debug result.status.cleaner_state
+					}
+				break;
+				case "st_dock":
 					if (result.status.cleaning == "1"){
 						sendEvent(name: 'status', value: "docking" as String)
 						sendEvent(name: 'switch', value: "on" as String)
@@ -165,12 +165,12 @@ def parse(String description) {
 						log.debug result.status.cleaner_state
 					}
 				break;
-                case "st_off":
-                sendEvent(name: 'switch', value: "off" as String)
-                sendEvent(name: 'status', value: "error" as String)
+				case "st_off":
+					sendEvent(name: 'switch', value: "off" as String)
+					sendEvent(name: 'status', value: "error" as String)
 				break;
-                default:
-				sendEvent(name: 'status', value: "error" as String)
+				default:
+					sendEvent(name: 'status', value: "error" as String)
 				break;
 			}
 			break;
@@ -186,45 +186,50 @@ def parse(String description) {
 
 def installed() {
 	log.debug "Installed with settings: ${settings}"
-	ipSetup()
+	initialize()
 }
 
 def updated() {
-    log.debug "Updated with settings: ${settings}"
-    ipSetup()
+	log.debug "Updated with settings: ${settings}"
+	initialize()
 }
- 
+
+def initialize() {
+	log.info "Thinking Cleaner ${textVersion()} ${textCopyright()}"
+	ipSetup()
+}
+
 def on() {
 	log.debug "Executing 'on'"
-    ipSetup()
-    api('on')
+	ipSetup()
+	api('on')
 }
 
 def off() {
 	log.debug "Executing 'off'"
-    api('off')
+	api('off')
 }
 
 def spot() {
 	log.debug "Executing 'spot'"
-    ipSetup()
+	ipSetup()
 	api('spot')
 }
 
 def poll() {
 	log.debug "Executing 'poll'"
-    api('refresh')
+	api('refresh')
 }
 
 def refresh() {
 	log.debug "Executing 'refresh'"
-    ipSetup()
-    api('refresh')
+	ipSetup()
+	api('refresh')
 }
 
 def beep() {
 	log.debug "Executing 'beep'"
-    ipSetup()
+	ipSetup()
 	api('beep')
 }
 
@@ -238,7 +243,7 @@ def api(String rooCommand, success = {}) {
     else {
 		sendEvent(name: 'network', value: "unknown" as String, displayed:false)
     }
-    switch (rooCommand) {
+	switch (rooCommand) {
 		case "on":
 			rooPath = "/command.json?command=clean"
 			log.debug "The Clean Command was sent"
@@ -247,29 +252,28 @@ def api(String rooCommand, success = {}) {
 			rooPath = "/command.json?command=dock"
 			log.debug "The Dock Command was sent"
 			break;
-        case "spot":
+		case "spot":
 			rooPath = "/command.json?command=spot"
 			log.debug "The Spot Command was sent"
 			break;
 		case "refresh":
-        	rooPath = "/status.json"
-            log.debug "The Status Command was sent"
-            break;
+			rooPath = "/status.json"
+			log.debug "The Status Command was sent"
+			break;
 		case "beep":
-        	rooPath = "/command.json?command=find_me"
-            log.debug "The Beep Command was sent"
-            break;
+			rooPath = "/command.json?command=find_me"
+			log.debug "The Beep Command was sent"
+			break;
 	}
     
 	switch (rooCommand) {
 		case "refresh":
-        case "beep":
-    		try {
+		case "beep":
+			try {
 				hubAction = new physicalgraph.device.HubAction(
 				method: "GET",
 				path: rooPath,
-				headers: [HOST: "${settings.ip}:${settings.port}", Accept: "application/json"]
-        		)
+				headers: [HOST: "${settings.ip}:${settings.port}", Accept: "application/json"])
 			}
 			catch (Exception e) {
 				log.debug "Hit Exception $e on $hubAction"
@@ -281,8 +285,8 @@ def api(String rooCommand, success = {}) {
 				method: "GET",
 				path: rooPath,
 				headers: [HOST: "${settings.ip}:${settings.port}", Accept: "application/json"]
-        		), delayAction(9900), api('refresh')]
-        	}
+				), delayAction(9900), api('refresh')]
+			}
 			catch (Exception e) {
 				log.debug "Hit Exception $e on $hubAction"
 			}
@@ -316,4 +320,12 @@ private String convertPortToHex(port) {
 }
 private delayAction(long time) {
 	new physicalgraph.device.HubAction("delay $time")
+}
+
+private def textVersion() {
+    def text = "Version 1.3"
+}
+
+private def textCopyright() {
+    def text = "Copyright © 2014 Sidjohn1"
 }
