@@ -16,18 +16,18 @@
  *	Version: 1.0 - Initial Version
  *	Version: 1.2 - Added error push notifcation, and better icons
  *	Version: 1.3 - New interface, better polling, and logging. Added sms notifcations
+ *	Version: 1.4 - Added bin full notifcations
  */
  
 definition(
-    name: "Thinking Cleanerer",
-    namespace: "sidjohn1",
-    author: "Sidney Johnson",
-    description: "Handles polling and job notification for Thinking Cleaner",
-    category: "Convenience",
-    iconUrl: "http://cdn.device-icons.smartthings.com/Appliances/appliances13-icn.png",
-    iconX2Url: "http://cdn.device-icons.smartthings.com/Appliances/appliances13-icn@2x.png",
-    iconX3Url: "http://cdn.device-icons.smartthings.com/Appliances/appliances13-icn@3x.png")
-
+ 	name: "Thinking Cleanerer",
+	namespace: "sidjohn1",
+	author: "Sidney Johnson",
+	description: "Handles polling and job notification for Thinking Cleaner",
+	category: "Convenience",
+	iconUrl: "http://cdn.device-icons.smartthings.com/Appliances/appliances13-icn.png",
+	iconX2Url: "http://cdn.device-icons.smartthings.com/Appliances/appliances13-icn@2x.png",
+	iconX3Url: "http://cdn.device-icons.smartthings.com/Appliances/appliances13-icn@3x.png")
 
 preferences {
 	page name:"pageInfo"
@@ -60,8 +60,9 @@ def pageInfo() {
 			input "sendPush", "bool", title: "Send as Push?", required: false, defaultValue: true
 			input "sendSMS", "phone", title: "Send as SMS?", required: false
 			input "sendRoombaOn", "bool", title: "Notify when on?", required: false, defaultValue: false
-            input "sendRoombaOff", "bool", title: "Notify when off?", required: false, defaultValue: false
-            input "sendRoombaError", "bool", title: "Notify on error?", required: false, defaultValue: false
+			input "sendRoombaOff", "bool", title: "Notify when off?", required: false, defaultValue: false
+			input "sendRoombaError", "bool", title: "Notify on error?", required: false, defaultValue: true
+			input "sendRoombaBin", "bool", title: "Notify on full bin?", required: false, defaultValue: true
 		}
 	}
 }
@@ -73,7 +74,7 @@ def installed() {
 
 def updated() {
 	log.trace "Updated with settings: ${settings}"
-    unschedule()
+	unschedule()
 	unsubscribe()
 	initialize()
 }
@@ -83,14 +84,16 @@ def initialize() {
 	subscribe(switch1, "switch.on", eventHandler)
 	subscribe(switch1, "switch.off", eventHandler)
 	subscribe(switch1, "status.error", eventHandler)
+	subscribe(switch1, "bin.full", eventHandler)
 }
 
 def eventHandler(evt) {
-    switch (evt.value) {
-    	case "error":
+	def msg
+	switch (evt.value) {
+		case "error":
 			sendEvent(linkText:app.label, name:"${evt.displayName}", value:"error",descriptionText:"${evt.displayName} has an error", eventType:"SOLUTION_EVENT", displayed: true)
 			log.trace "${evt.displayName} has an error"
-			def msg = "${evt.displayName} has an error"
+			msg = "${evt.displayName} has an error"
 			if (sendRoombaError == true) {
 				if (settings.sendSMS != null) {
 					sendSms(phoneNumber, msg) 
@@ -99,13 +102,12 @@ def eventHandler(evt) {
 					sendPush(msg)
 				}
 			}
-            schedule("39 0/15 * 1/1 * ?", pollErr)
+			schedule("39 0/15 * 1/1 * ?", pollErr)
 		break;
-        
 		case "on":
-        	sendEvent(linkText:app.label, name:"${evt.displayName}", value:"on",descriptionText:"${evt.displayName} is on", eventType:"SOLUTION_EVENT", displayed: true)
-        	log.trace "${evt.displayName} is on"
-            def msg = "${evt.displayName} is on"
+			sendEvent(linkText:app.label, name:"${evt.displayName}", value:"on",descriptionText:"${evt.displayName} is on", eventType:"SOLUTION_EVENT", displayed: true)
+			log.trace "${evt.displayName} is on"
+			msg = "${evt.displayName} is on"
         	schedule("15 0/1 * 1/1 * ?", pollOn)
 			if (sendRoombaOn == true) {
 				if (settings.sendSMS != null) {
@@ -116,11 +118,24 @@ def eventHandler(evt) {
 				}
 			}
 		break;
+		case "full":
+			sendEvent(linkText:app.label, name:"${evt.displayName}", value:"bin full",descriptionText:"${evt.displayName} bin is full", eventType:"SOLUTION_EVENT", displayed: true)
+			log.trace "${evt.displayName} bin is full"
+			msg = "${evt.displayName} bin is full"
+			if (sendRoombaBin == true) {
+				if (settings.sendSMS != null) {
+					sendSms(phoneNumber, msg) 
+				}
+				if (settings.sendPush == true) {
+					sendPush(msg)
+				}
+			}
+		break;
         
 		default:
-        	sendEvent(linkText:app.label, name:"${evt.displayName}", value:"off",descriptionText:"${evt.displayName} is off", eventType:"SOLUTION_EVENT", displayed: true)
-        	log.trace "${evt.displayName} is off"
-			def msg = "${evt.displayName} is off"
+			sendEvent(linkText:app.label, name:"${evt.displayName}", value:"off",descriptionText:"${evt.displayName} is off", eventType:"SOLUTION_EVENT", displayed: true)
+			log.trace "${evt.displayName} is off"
+			msg = "${evt.displayName} is off"
 			if (sendRoombaOff == true) {
 				if (settings.sendSMS != null) {
 					sendSms(phoneNumber, msg) 
@@ -131,54 +146,54 @@ def eventHandler(evt) {
 			}
 			schedule("22 4 0/1 1/1 * ? *", pollOff)
 		break;
-    }
+	}
 }
 
 def pollOn() {
 	def onSwitch1 = switch1.currentSwitch.findAll { switchVal ->
-        switchVal == "on" ? true : false
+		switchVal == "on" ? true : false
 	}
 	settings.switch1.each() {
-    	if (it.currentSwitch == "on") {
-        	it.poll()
-    	}
-    }
-    if (onSwitch1.size() == 0) {
-        unschedule(pollOn)
-    }
+		if (it.currentSwitch == "on") {
+			it.poll()
+		}
+	}
+	if (onSwitch1.size() == 0) {
+		unschedule(pollOn)
+	}
 }
 
 def pollOff() {
 	def offSwitch1 = switch1.currentSwitch.findAll { switchVal ->
-        switchVal == "off" ? true : false
+		switchVal == "off" ? true : false
 	}
 	settings.switch1.each() {
-    	if (it.currentSwitch == "off") {
-        	it.poll()
-    	}
-    }
-    if (offSwitch1.size() == 0) {
-        unschedule(pollOff)
-    }
+		if (it.currentSwitch == "off") {
+			it.poll()
+		}
+	}
+	if (offSwitch1.size() == 0) {
+		unschedule(pollOff)
+	}
 }
 
 def pollErr() {
 	def errSwitch1 = switch1.currentStatus.findAll { switchVal ->
-        switchVal == "error" ? true : false
+		switchVal == "error" ? true : false
 	}
 	settings.switch1.each() {
-    	if (it.currentStatus == "error") {
-        	it.poll()
-    	}
-    }
-    if (errSwitch1.size() == 0) {
-        unschedule(pollErr)
-    }
+		if (it.currentStatus == "error") {
+			it.poll()
+		}
+	}
+	if (errSwitch1.size() == 0) {
+		unschedule(pollErr)
+	}
 }
 private def textVersion() {
-    def text = "Version 1.3"
+    def text = "Version 1.4"
 }
 
 private def textCopyright() {
-    def text = "Copyright © 2014 Sidjohn1"
+    def text = "Copyright © 2015 Sidjohn1"
 }
