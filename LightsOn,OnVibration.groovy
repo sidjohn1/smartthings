@@ -41,7 +41,6 @@ preferences {
 	}
 }
 
-
 def installed() {
 	log.debug "Installed with settings: ${settings}"
 	subscribe(contact1, "acceleration.active", initialize)
