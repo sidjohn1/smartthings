@@ -12,8 +12,8 @@ If you find this code usefull, please support the developer via PayPal:<br/> [![
 <b>SmartTurnItOn.groovy:</b> Turns on a device at a set time on set day(s) of the week on if a persons presense is detected. Also turns the device off after a set time.<br>
 <b>ThermostatAutoAway.groovy:</b> Smartthings smartapp that sets a thermostat to "Away" when presence(s) are no longer detected.<br>
 <b>ThermostatAutoHome.groovy:</b> Smartthings smartapp that sets a thermostat to "Home" when presence(s) are detected.<br>
-<b>ThinkingCleaner.groovy:</b> Thinking Cleaner(Roomba) devicetype for Smartthings, Allows Smartthings to scheulde and control your roomba.<br>
-<b>ThinkingCleanerer.groovy:</b> Thinking Cleaner(Roomba) smartapp for Smartthings, Monitors your roomba and reports any errors.<br>
+<b>ThinkingCleaner.groovy([Devshot](http://sidjohn1.github.io/smartthings/thinkingcleaner.jpg)):</b> Thinking Cleaner(Roomba) devicetype for Smartthings, Allows Smartthings to scheulde and control your roomba.<br>
+<b>ThinkingCleanerer.groovy([Appshot](http://sidjohn1.github.io/smartthings/thinkingcleanerer.jpg)):</b> Thinking Cleaner(Roomba) smartapp for Smartthings, Monitors your roomba and reports any errors.<br>
 <b>TurnItOffWhenNotInUse.groovy:</b> Smartthings smartapp that monitors a Smart Power Outlet(powermeter) to turn off a device at a set time if the power usage is below a set point. Can also turn it back on at a set time.<br>
 
 <h2>FAQ:</h2>
