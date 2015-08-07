@@ -3,7 +3,7 @@
  *
  *	Smartthings Devicetype
  *
- *  Copyright 2014 Sidney Johnson
+ *  Copyright 2015 Sidney Johnson
  *  If you like this device, please support the developer via PayPal: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XKDRYZ3RUNR9Y
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -19,6 +19,7 @@
  *	Version: 1.1 - Fixed installed and updated functions
  *	Version: 1.2 - Added error tracking, and better icons, link state
  *	Version: 1.3 - Better error tracking, error correction and the ability to change the default port (thx to sidhartha100), fix a bug that prevented auto population of deviceNetworkId
+ *	Version: 1.4 - Added bin status and code clean up
  *
  */
 import groovy.json.JsonSlurper
@@ -31,9 +32,10 @@ metadata {
 		capability "Switch"
 		capability "Tone"
         
-        command "spot"
+		command "spot"
 
-        attribute "network","string"
+		attribute "network","string"
+		attribute "bin","string"
 	}
     
 	preferences {
@@ -49,14 +51,24 @@ metadata {
 				[value: 96, color: "#79b821"]
 			])
 		}
-		standardTile("beep", "device.beep", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
+		standardTile("beep", "device.beep", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false, decoration: "flat") {
 			state "beep", label:'beep', action:"tone.beep", icon:"st.quirky.spotter.quirky-spotter-sound-on", backgroundColor:"#ffffff"
+		}
+		standardTile("bin", "device.bin", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
+			state ("default", label:'unknown', icon: "st.unknown.unknown.unknown")
+			state ("empty", label:'Bin Empty', icon: "st.Kids.kids10", backgroundColor: "#79b821")
+			state ("full", label:'Bin Full', icon: "st.Kids.kids19", backgroundColor: "#bc2323")
 		}
 		standardTile("clean", "device.switch", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
 			state("on", label: 'clean', action: "switch.on", icon: "st.Appliances.appliances13", backgroundColor: "#79b821")
 		}
 		standardTile("dock", "device.switch", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
 			state("off", label: 'dock', action: "switch.off", icon: "st.Appliances.appliances13", backgroundColor: "#79b821")
+		}
+		standardTile("network", "device.network", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
+			state ("default", label:'unknown', icon: "st.unknown.unknown.unknown")
+			state ("Connected", label:'Link Good', icon: "st.Appliances.appliances13", backgroundColor: "#79b821")
+			state ("Not Connected", label:'Link Bad', icon: "st.Appliances.appliances13", backgroundColor: "#bc2323")
 		}
 		standardTile("spot", "device.spot", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
 			state("spot", label: 'spot', action: "spot", icon: "st.Appliances.appliances13", backgroundColor: "#79b821")
@@ -73,96 +85,102 @@ metadata {
 			state ("error", label:'${currentValue}', icon: "st.Appliances.appliances13", backgroundColor: "#bc2323")
 			state ("waiting", label:'${currentValue}', icon: "st.Appliances.appliances13")
 		}
-		standardTile("network", "device.network", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
-			state ("default", label:'unknown', icon: "st.unknown.unknown.unknown")
-			state ("Connected", label:'Link Good', icon: "st.Appliances.appliances13", backgroundColor: "#79b821")
-			state ("Not Connected", label:'Link Bad', icon: "st.Appliances.appliances13", backgroundColor: "#bc2323")
-		}
 		main("clean")
-			details(["clean","spot","dock","battery","status","network","beep","refresh"])
+			details(["clean","spot","dock","battery","status","bin","network","beep","refresh"])
 		}
 }
 
 // parse events into attributes
 def parse(String description) {
-	def map = stringToMap(description)
-	def headerString = new String(map.headers.decodeBase64())
-//	log.debug headerString
+	def map
+	def headerString
+	def bodyString
+	def slurper
+	def result
+    
+	map = stringToMap(description)
+	headerString = new String(map.headers.decodeBase64())
 	if (headerString.contains("200 OK")) {
-		def bodyString = new String(map.body.decodeBase64())
-//		log.debug bodyString
-		def slurper = new JsonSlurper()
-		def result = slurper.parseText(bodyString)
-//		log.debug result.action
+		bodyString = new String(map.body.decodeBase64())
+		slurper = new JsonSlurper()
+		result = slurper.parseText(bodyString)
 		switch (result.action) {
 			case "command":
 				sendEvent(name: 'network', value: "Connected" as String)
 			break;
-			case "status":
+			case "full_status":
 				sendEvent(name: 'network', value: "Connected" as String)
-				sendEvent(name: 'battery', value: result.status.battery_charge as Integer)
-			switch (result.status.cleaner_state) {
+				sendEvent(name: 'battery', value: result.power_status.battery_charge as Integer)
+			switch (result.tc_status.bin_status) {
+				case "0":
+					sendEvent(name: 'bin', value: "empty" as String)
+				break;
+				case "1":
+					sendEvent(name: 'bin', value: "full" as String)
+				break;
+			}
+			switch (result.power_status.cleaner_state) {
 				case "st_base":
-				sendEvent(name: 'status', value: "docked" as String)
-				sendEvent(name: 'switch', value: "off" as String)
+					sendEvent(name: 'status', value: "docked" as String)
+					sendEvent(name: 'switch', value: "off" as String)
 				break;
 				case "st_base_recon":
-				sendEvent(name: 'status', value: "charging" as String)
-				sendEvent(name: 'switch', value: "off" as String)
+					sendEvent(name: 'status', value: "charging" as String)
+					sendEvent(name: 'switch', value: "off" as String)
 				break;
 				case "st_base_full":
-				sendEvent(name: 'status', value: "charging" as String)
-				sendEvent(name: 'switch', value: "off" as String)
+					sendEvent(name: 'status', value: "charging" as String)
+					sendEvent(name: 'switch', value: "off" as String)
 				break;
 				case "st_base_trickle":
-				sendEvent(name: 'status', value: "docked" as String)
-				sendEvent(name: 'switch', value: "off" as String)
+					sendEvent(name: 'status', value: "docked" as String)
+					sendEvent(name: 'switch', value: "off" as String)
 				break;
 				case "st_base_wait":
-				sendEvent(name: 'status', value: "docked" as String)
-				sendEvent(name: 'switch', value: "off" as String)
+					sendEvent(name: 'status', value: "docked" as String)
+					sendEvent(name: 'switch', value: "off" as String)
 				break;
 				case "st_clean":
-					if (result.status.cleaning == "1"){
+					if (result.power_status.cleaning == "1"){
 						sendEvent(name: 'status', value: "cleaning" as String)
 						sendEvent(name: 'switch', value: "on" as String)
 					}
 					else {
 						sendEvent(name: 'status', value: "error" as String)
 						sendEvent(name: 'switch', value: "on" as String)
-						log.debug result.status.cleaner_state
+						log.debug result.power_status.cleaner_state
 					}
 				break;
 				case "st_clean_spot":
-					if (result.status.cleaning == "1"){
+					if (result.power_status.cleaning == "1"){
 						sendEvent(name: 'status', value: "cleaning" as String)
 						sendEvent(name: 'switch', value: "on" as String)
 					}
 					else {
 						sendEvent(name: 'status', value: "error" as String)
 						sendEvent(name: 'switch', value: "on" as String)
-						log.debug result.status.cleaner_state
+						log.debug result.power_status.cleaner_state
 					}
 				break;
 				case "st_clean_max":
-					if (result.status.cleaning == "1"){
+					if (result.power_status.cleaning == "1"){
 						sendEvent(name: 'status', value: "cleaning" as String)
 						sendEvent(name: 'switch', value: "on" as String)
 					}
 					else {
 						sendEvent(name: 'status', value: "error" as String)
 						sendEvent(name: 'switch', value: "on" as String)
-						log.debug result.status.cleaner_state
+						log.debug result.power_status.cleaner_state
 					}
 				break;
 				case "st_dock":
-					if (result.status.cleaning == "1"){
+					if (result.power_status.cleaning == "1"){
 						sendEvent(name: 'status', value: "docking" as String)
 						sendEvent(name: 'switch', value: "on" as String)
 					}
 					else {
 						sendEvent(name: 'status', value: "error" as String)
-						log.debug result.status.cleaner_state
+						log.debug result.power_status.cleaner_state
 					}
 				break;
 				case "st_off":
@@ -180,6 +198,7 @@ def parse(String description) {
 		sendEvent(name: 'status', value: "error" as String)
 		log.debug headerString
 	}
+	parse
 }
 
 // handle commands
@@ -234,8 +253,8 @@ def beep() {
 }
 
 def api(String rooCommand, success = {}) {
-	def rooPath = ""
-	def hubAction = ""
+	def rooPath
+	def hubAction
     if (device.currentValue('network') == "unknown"){
     	sendEvent(name: 'network', value: "Not Connected" as String)
         log.debug "Network is not connected"
@@ -247,23 +266,23 @@ def api(String rooCommand, success = {}) {
 		case "on":
 			rooPath = "/command.json?command=clean"
 			log.debug "The Clean Command was sent"
-			break;
+		break;
 		case "off":
 			rooPath = "/command.json?command=dock"
 			log.debug "The Dock Command was sent"
-			break;
+		break;
 		case "spot":
 			rooPath = "/command.json?command=spot"
 			log.debug "The Spot Command was sent"
-			break;
+		break;
 		case "refresh":
-			rooPath = "/status.json"
+			rooPath = "/full_status.json"
 			log.debug "The Status Command was sent"
-			break;
+		break;
 		case "beep":
 			rooPath = "/command.json?command=find_me"
 			log.debug "The Beep Command was sent"
-			break;
+		break;
 	}
     
 	switch (rooCommand) {
@@ -306,7 +325,6 @@ def ipSetup() {
     }
     if (settings.ip && settings.port) {
 		device.deviceNetworkId = "$hosthex:$porthex"
-//		log.debug "The device id configured is: ${device.deviceNetworkId}"
 	}
 }
 
@@ -322,10 +340,24 @@ private delayAction(long time) {
 	new physicalgraph.device.HubAction("delay $time")
 }
 
+private def generateURL() {    
+	if (!state.accessToken) {
+		try {
+			createAccessToken()
+			log.debug "Creating new Access Token: $state.accessToken"
+		} catch (e) {
+			log.error "Enable OAuth in SmartApp IDE settings for Thinking Cleaner"
+			log.error e
+		}
+    }
+	def url = "/api/smartapps/installations/${app.id}/u?access_token=${state.accessToken}"
+	return "$url"
+}
+
 private def textVersion() {
-    def text = "Version 1.3"
+    def text = "Version 1.4"
 }
 
 private def textCopyright() {
-    def text = "Copyright © 2014 Sidjohn1"
+    def text = "Copyright © 2015 Sidjohn1"
 }
