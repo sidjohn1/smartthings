@@ -18,6 +18,7 @@
  *	Version: 1.2 - Decoupled weather data refresh from wallpaper refresh
  *	Version: 1.3 - Minor formating tweaks, removed all static data from json
  *	Version: 2.0 - Addeded 3 day forcast and more formating and presentation tweaks. Removed weather station requirement
+ *	Version: 2.1 - Preloads images for smoother transitions
  *
  */
 definition(
@@ -90,14 +91,14 @@ def installed() {
 
 def updated() {
 	log.debug "Updated with settings: ${settings}"
-    unschedule()
+	unschedule()
 	unsubscribe()
 	initialize()
 }
 
 def initialize() {
 	log.info "Weather Panel ${textVersion()} ${textCopyright()}"
-    generateURL()
+	generateURL()
 }
 
 def generateHtml() {
@@ -304,7 +305,10 @@ u{
 			}
 			bg = path+obj.path;
 			bg = bg.replace('#','%23');
-			document.body.background = bg;		
+            \$('<img src="'+bg+'"/>');
+            setTimeout(function(){
+				document.body.background = bg;
+			},3000);
 		});
         setTimeout('\$("#data").click()', 1800000);
 	});
@@ -415,7 +419,7 @@ private def generateURL(data) {
 }
 
 private def textVersion() {
-    def text = "Version 2.0"
+    def text = "Version 2.1"
 }
 
 private def textCopyright() {
