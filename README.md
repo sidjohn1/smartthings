@@ -9,7 +9,7 @@ If you find this code usefull, please support the developer via PayPal:<br/> [![
 <b>WeatherPanel ([Appshot](http://sidjohn1.github.io/smartthings/weatherpannel.jpg)):</b> Smartthings smartapp that displays inside and outside temp and weather infomation as a web page. Also has a random customizable background serviced by Dropbox public folders.<br>
 <b>Lights On, On Vibration.groovy:</b> Smartthings smartapp that turns on and back off a light when a sensor is vibrated. This app works well with a Smartsence Multi attached to your doorbell to detect when it has rung. The vibration of the ring will trigger the selected light to turn on.<br>
 <b>PlantLink-DirectMonitor.groovy ([Appshot](http://sidjohn1.github.io/smartthings/plantlink.jpg)):</b> Monitors your Plantlinks via [Kristopher Kubicki's plantlink-direct devicetype](https://github.com/KristopherKubicki/device-plantlink-direct) , and sends notifacations when your plants need water.<br>
-<b>Presence Manager.groovy ([Appshot](http://sidjohn1.github.io/smartthings/presencemanager.jpg)):</b>Manages presence based off lock code, presence, motion, contact and acceleration sensors.<br>
+<b>PresenceManager.groovy ([Appshot](http://sidjohn1.github.io/smartthings/presencemanager.jpg)):</b> Manages presence based off lock code, presence, motion, contact and acceleration sensors.<br>
 <b>SmartTurnItOn.groovy:</b> Turns on a device at a set time on set day(s) of the week on if a persons presense is detected. Also turns the device off after a set time.<br>
 <b>ThermostatAutoAway.groovy:</b> Smartthings smartapp that sets a thermostat to "Away" when presence(s) are no longer detected.<br>
 <b>ThermostatAutoHome.groovy:</b> Smartthings smartapp that sets a thermostat to "Home" when presence(s) are detected.<br>
