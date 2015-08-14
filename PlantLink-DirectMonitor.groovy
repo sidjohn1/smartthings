@@ -17,6 +17,8 @@
  *
  *	Version: 1.0 - Initial Version
  *	Version: 1.01 - Added humidity to the display
+ *	Version: 1.1 - Consolidated pages
+  *	Version: 1.2 - Automated notifcation schedule
  */
 definition(
     name: "PlantLink-Direct Monitor",
@@ -30,11 +32,10 @@ definition(
 
 preferences {
     page name:"pageInfo"
-    page name:"pageConf"
 }
 
 def pageInfo() {
-	return dynamicPage(name: "pageInfo", title: "PlantLink-Direct Monitor", install: true, uninstall: true) {
+	return dynamicPage(name: "pageInfo", install: true, uninstall: true) {
 		section("About") {
 		paragraph "PlantLink-Direct Monitor, Monitors your Plantlinks via Kristopher Kubicki's plantlink-direct devicetype, and sends notifacations when your plants need water."
 		paragraph "${textVersion()}\n${textCopyright()}"
@@ -53,23 +54,14 @@ def pageInfo() {
 				paragraph plantlist.trim()
 			}
 		}
-		section() {
-			href "pageConf", title: "Configure"
+        section("Select PlantLinks...") {
+			input "senors", "device.PlantlinkDirectSensor", title: "PlantLink-Direct...", multiple: true, required: true, submitOnChange: true
 		}
-	}
-}
-
-def pageConf() {
-	return dynamicPage(name: "pageConf", title: "PlantLink-Direct Monitor", nextPage: "pageInfo") {
-		section("Select Sensors...") {
-			input "senors", "device.PlantlinkDirectSensor", title: "PlantLink-Direct...", multiple: true, required: true
-		}
-		section("Select events to to recieve notifications for..."){
-			input "sendPush", "enum", title: "Push?", options: ["Yes", "No"], required: false, defaultValue: "Yes"
-			input "sendSMS", "phone", title: "SMS?", required: false
-			input "sendTooDry", "enum", title: "Too Dry?", options: ["Yes", "No"], required: false, defaultValue: "Yes"
-			input "sendTooWet", "enum", title: "Too Wet?", options: ["Yes", "No"], required: false, defaultValue: "No"
-			input "sendTime", "time", title: "At what time?", required: true
+		section("Event Notifications..."){
+			input "sendPush", "bool", title: "Send as Push?", required: false, defaultValue: true
+			input "sendSMS", "phone", title: "Send as SMS?", required: false
+			input "sendTooDry", "bool", title: "Notify when too dry?", required: false, defaultValue: true
+            input "sendTooWet", "bool", title: "Notify when too wet?", required: false, defaultValue: false
 		}
 	}
 }
@@ -87,20 +79,20 @@ def updated() {
 
 def initialize() {
 	log.info "PlantLink-Direct Monitor ${textVersion()} ${textCopyright()}"
-	schedule(settings.sendTime, sendStatus)
+    schedule("22 32 6,19 1/1 * ?", sendStatus)
 }
 
 def sendStatus() {
 	log.trace "Checking Plants"
-	sendEvent(linkText:app.label, name:"sendStatus", descriptionText:"Checking Plants", eventType:"SOLUTION_EVENT", displayed: true)
+	sendEvent(linkText:app.label, name:"sendStatus", value:"Checking Plants", descriptionText:"Checking Plants", eventType:"SOLUTION_EVENT", displayed: true)
 	settings.senors.each() {
 		try {
 			log.trace "${it.displayName} is ${it.currentStatus}"
 			sendEvent(linkText:app.label, name:"${it.displayName}", value:"${it.currentStatus} at ${it.currentHumidity}%", descriptionText:"${it.displayName} is ${it.currentStatus} at ${it.currentHumidity}", eventType:"SOLUTION_EVENT", displayed: true)
-			if (it.currentStatus == "Too Wet" && settings.sendTooWet == "Yes") {
+			if (it.currentStatus == "Too Wet" && settings.sendTooWet == true) {
 				send("${it.displayName} is ${it.currentStatus}")
 			}
-			if (it.currentStatus == "Too Dry" && settings.sendTooDry == "Yes") {
+			if (it.currentStatus == "Too Dry" && settings.sendTooDry == true) {
 				send("${it.displayName} is ${it.currentStatus}")
 			}
 		}
@@ -112,21 +104,16 @@ def sendStatus() {
 }
 
 def send(msg) {
-    log.trace msg
-
-    if (settings.sendPush) {
+    if (settings.sendPush == true) {
         sendPush(msg)
-    } else {
-        sendNotificationEvent(msg)
     }
-
     if (settings.sendSMS != null) {
-	sendSms(phoneNumber, msg) 
+        sendSms(phoneNumber, msg) 
     }
 }
 
 private def textVersion() {
-    def text = "Version 1.01"
+    def text = "Version 1.2"
 }
 
 private def textCopyright() {
