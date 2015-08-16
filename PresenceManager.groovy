@@ -15,6 +15,7 @@
  *	Layout inspired by Tim Slagle & Michael Strucks' Lighting Director
  *
  *	Version 1.0 - Original release
+ *	Version 1.0.1 - Number input bug fix
  */
 definition(
 	name: "Presence Manager",
@@ -111,7 +112,7 @@ def pagePersonA() {
 	
 	def inputPersonAccelerationDetailsA = [
 		name: "PersonAccelerationDetailsA",
-		type: "num",
+		type: "number",
 		title: "Wait time (minutes)",
 		multiple: false,
 		required: false,
@@ -151,7 +152,7 @@ def pagePersonA() {
 	
 	def inputPersonMotionDetailsA = [
 		name: "PersonMotionDetailsA",
-		type: "num",
+		type: "number",
 		title: "Wait time (minutes)",
 		multiple: false,
 		required: false,
@@ -192,7 +193,7 @@ def pagePersonA() {
 	
 	def inputPersonLockDetailsA = [
 		name: "PersonLockDetailsA",
-		type: "num",
+		type: "number",
 		title: "Lock Code (1-10)",
 		multiple: false,
 		required: true,
@@ -251,7 +252,7 @@ def pagePersonB() {
 	
 	def inputPersonAccelerationDetailsB = [
 		name: "PersonAccelerationDetailsB",
-		type: "num",
+		type: "number",
 		title: "Wait time (minutes)",
 		multiple: false,
 		required: false,
@@ -291,7 +292,7 @@ def pagePersonB() {
 	
 	def inputPersonMotionDetailsB = [
 		name: "PersonMotionDetailsB",
-		type: "num",
+		type: "number",
 		title: "Wait time (minutes)",
 		multiple: false,
 		required: false,
@@ -332,7 +333,7 @@ def pagePersonB() {
 	
 	def inputPersonLockDetailsB = [
 		name: "PersonLockDetailsB",
-		type: "num",
+		type: "number",
 		title: "Lock Code (1-10)",
 		multiple: false,
 		required: true,
@@ -391,7 +392,7 @@ def pagePersonC() {
 	
 	def inputPersonAccelerationDetailsC = [
 		name: "PersonAccelerationDetailsC",
-		type: "num",
+		type: "number",
 		title: "Wait time (minutes)",
 		multiple: false,
 		required: false,
@@ -431,7 +432,7 @@ def pagePersonC() {
 	
 	def inputPersonMotionDetailsC = [
 		name: "PersonMotionDetailsC",
-		type: "num",
+		type: "number",
 		title: "Wait time (minutes)",
 		multiple: false,
 		required: false,
@@ -472,7 +473,7 @@ def pagePersonC() {
 	
 	def inputPersonLockDetailsC = [
 		name: "PersonLockDetailsC",
-		type: "num",
+		type: "number",
 		title: "Lock Code (1-10)",
 		multiple: false,
 		required: true,
@@ -531,7 +532,7 @@ def pagePersonD() {
 	
 	def inputPersonAccelerationDetailsD = [
 		name: "PersonAccelerationDetailsD",
-		type: "num",
+		type: "number",
 		title: "Wait time (minutes)",
 		multiple: false,
 		required: false,
@@ -571,7 +572,7 @@ def pagePersonD() {
 	
 	def inputPersonMotionDetailsD = [
 		name: "PersonMotionDetailsD",
-		type: "num",
+		type: "number",
 		title: "Wait time (minutes)",
 		multiple: false,
 		required: false,
@@ -612,7 +613,7 @@ def pagePersonD() {
 	
 	def inputPersonLockDetailsD = [
 		name: "PersonLockDetailsD",
-		type: "num",
+		type: "number",
 		title: "Lock Code (1-10)",
 		multiple: false,
 		required: true,
@@ -671,7 +672,7 @@ def pagePersonE() {
 	
 	def inputPersonAccelerationDetailsE = [
 		name: "PersonAccelerationDetailsE",
-		type: "num",
+		type: "number",
 		title: "Wait time (minutes)",
 		multiple: false,
 		required: false,
@@ -711,7 +712,7 @@ def pagePersonE() {
 	
 	def inputPersonMotionDetailsE = [
 		name: "PersonMotionDetailsE",
-		type: "num",
+		type: "number",
 		title: "Wait time (minutes)",
 		multiple: false,
 		required: false,
@@ -752,7 +753,7 @@ def pagePersonE() {
 	
 	def inputPersonLockDetailsE = [
 		name: "PersonLockDetailsE",
-		type: "num",
+		type: "number",
 		title: "Lock Code (1-10)",
 		multiple: false,
 		required: true,
@@ -811,7 +812,7 @@ def pagePersonF() {
 	
 	def inputPersonAccelerationDetailsF = [
 		name: "PersonAccelerationDetailsF",
-		type: "num",
+		type: "number",
 		title: "Wait time (minutes)",
 		multiple: false,
 		required: false,
@@ -851,7 +852,7 @@ def pagePersonF() {
 	
 	def inputPersonMotionDetailsF = [
 		name: "PersonMotionDetailsF",
-		type: "num",
+		type: "number",
 		title: "Wait time (minutes)",
 		multiple: false,
 		required: false,
@@ -892,7 +893,7 @@ def pagePersonF() {
 	
 	def inputPersonLockDetailsF = [
 		name: "PersonLockDetailsF",
-		type: "num",
+		type: "number",
 		title: "Lock Code (1-10)",
 		multiple: false,
 		required: true,
@@ -1271,7 +1272,7 @@ private def nameText() {
 }
 
 private def textVersion() {
-	def text = "Version 1.0"
+	def text = "Version 1.0.1"
 }
 
 private def textCopyright() {
