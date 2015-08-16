@@ -1,5 +1,5 @@
 /**
- *  Presence Tracker
+ *  Presence Manager
  *
  *  Copyright 2015 Sidney Johnson
  *
@@ -15,7 +15,7 @@
  *	Layout inspired by Tim Slagle & Michael Strucks' Lighting Director
  *
  *	Version 1.0 - Original release
- *	Version 1.0.1 - Number input bug fix
+ *	Version 1.0.1 - Number input bug fix, code clean up
  */
 definition(
 	name: "Presence Manager",
@@ -951,7 +951,7 @@ def updated() {
 }
 
 def initialize() {
-	log.info "Occupancy ${textVersion()} ${textCopyright()}"
+	log.info "Presence Manager ${textVersion()} ${textCopyright()}"
 	if (PersonAccelerationA) {
 		subscribe(settings.PersonAccelerationA, "acceleration", eventHandlerA)
 	}
@@ -962,7 +962,7 @@ def initialize() {
 		subscribe(settings.PersonMotionA, "motion", eventHandlerA)
 	}
 	if (PersonLockA) {
-		subscribe(settings.PersonLockA, "lock.unlocked ", eventHandlerA)
+		subscribe(settings.PersonLockA, "lock.unlocked", eventHandlerA)
 	}
 	if (PersonPresenceA) {
 		subscribe(settings.PersonPresenceA, "presence", eventHandlerA)
@@ -978,7 +978,7 @@ def initialize() {
 		subscribe(settings.PersonMotionB, "motion", eventHandlerB)
 	}
 	if (PersonLockB) {
-		subscribe(settings.PersonLockB, "lock.unlocked ", eventHandlerB)
+		subscribe(settings.PersonLockB, "lock.unlocked", eventHandlerB)
 	}
 	if (PersonPresenceB) {
 		subscribe(settings.PersonPresenceB, "presence", eventHandlerB)
@@ -994,7 +994,7 @@ def initialize() {
 		subscribe(settings.PersonMotionC, "motion", eventHandlerC)
 	}
 	if (PersonLockC) {
-		subscribe(settings.PersonLockC, "lock.unlocked ", eventHandlerC)
+		subscribe(settings.PersonLockC, "lock.unlocked", eventHandlerC)
 	}
 	if (PersonPresenceC) {
 		subscribe(settings.PersonPresenceC, "presence", eventHandlerC)
@@ -1010,7 +1010,7 @@ def initialize() {
 		subscribe(settings.PersonMotionD, "motion", eventHandlerD)
 	}
 	if (PersonLockD) {
-		subscribe(settings.PersonLockD, "lock.unlocked ", eventHandlerD)
+		subscribe(settings.PersonLockD, "lock.unlocked", eventHandlerD)
 	}
 	if (PersonPresenceD) {
 		subscribe(settings.PersonPresenceD, "presence", eventHandlerD)
@@ -1026,7 +1026,7 @@ def initialize() {
 		subscribe(settings.PersonMotionE, "motion", eventHandlerE)
 	}
 	if (PersonLockE) {
-		subscribe(settings.PersonLockE, "lock.unlocked ", eventHandlerE)
+		subscribe(settings.PersonLockE, "lock.unlocked", eventHandlerE)
 	}
 	if (PersonPresenceE) {
 		subscribe(settings.PersonPresenceE, "presence", eventHandlerE)
@@ -1042,7 +1042,7 @@ def initialize() {
 		subscribe(settings.PersonMotionF, "motion", eventHandlerF)
 	}
 	if (PersonLockF) {
-		subscribe(settings.PersonLockF, "lock.unlocked ", eventHandlerF)
+		subscribe(settings.PersonLockF, "lock.unlocked", eventHandlerF)
 	}
 	if (PersonPresenceF) {
 		subscribe(settings.PersonPresenceF, "presence", eventHandlerF)
@@ -1067,7 +1067,7 @@ def eventHandlerA(evt) {
 		}
 	}
 	else {
-		if ((evt.name == "acceleration" && evt.value == "active") || (evt.name == "contact" && evt.value == settings.PersonContactDetailsA) || (evt.name == "lock" && evt.value == "unlocked" && evt.data.replaceAll("\\D+","") == PersonLockDetailsA) || (evt.name == "motion" && evt.value == "active") || (evt.name == "presence" && evt.value == "present")) {
+		if ((evt.name == "acceleration" && evt.value == "active") || (evt.name == "contact" && evt.value == settings.PersonContactDetailsA) || (evt.name == "lock" && evt.value == "unlocked" && evt.descriptionText.contains("${PersonLockDetailsA}")) || (evt.name == "motion" && evt.value == "active") || (evt.name == "presence" && evt.value == "present")) {
 			PersonVPresenceA.arrived()
 			sendEvent(linkText:app.label, name:"${settings.PersonVPresenceA.name}", value:"present",descriptionText:"${settings.PersonVPresenceA.name} is present due to ${evt.name}", eventType:"SOLUTION_EVENT", displayed: true)
 			log.trace "${settings.PersonVPresenceA.name} is present due to ${evt.name}"
@@ -1093,7 +1093,7 @@ def eventHandlerB(evt) {
 		}
 	}
 	else {
-		if ((evt.name == "acceleration" && evt.value == "active") || (evt.name == "contact" && evt.value == settings.PersonContactDetailsB) || (evt.name == "lock" && evt.value == "unlocked" && evt.data.replaceAll("\\D+","") == PersonLockDetailsB) || (evt.name == "motion" && evt.value == "active") || (evt.name == "presence" && evt.value == "present")) {
+		if ((evt.name == "acceleration" && evt.value == "active") || (evt.name == "contact" && evt.value == settings.PersonContactDetailsB) || (evt.name == "lock" && evt.value == "unlocked" && evt.descriptionText.contains("${PersonLockDetailsB}")) || (evt.name == "motion" && evt.value == "active") || (evt.name == "presence" && evt.value == "present")) {
 			PersonVPresenceB.arrived()
 			sendEvent(linkText:app.label, name:"${settings.PersonVPresenceB.name}", value:"present",descriptionText:"${settings.PersonVPresenceB.name} is present due to ${evt.name}", eventType:"SOLUTION_EVENT", displayed: true)
 			log.trace "${settings.PersonVPresenceB.name} is present due to ${evt.name}"
@@ -1119,7 +1119,7 @@ def eventHandlerC(evt) {
 		}
 	}
 	else {
-		if ((evt.name == "acceleration" && evt.value == "active") || (evt.name == "contact" && evt.value == settings.PersonContactDetailsC) || (evt.name == "lock" && evt.value == "unlocked" && evt.data.replaceAll("\\D+","") == PersonLockDetailsC) || (evt.name == "motion" && evt.value == "active") || (evt.name == "presence" && evt.value == "present")) {
+		if ((evt.name == "acceleration" && evt.value == "active") || (evt.name == "contact" && evt.value == settings.PersonContactDetailsC) || (evt.name == "lock" && evt.descriptionText.contains("${PersonLockDetailsC}")) || (evt.name == "motion" && evt.value == "active") || (evt.name == "presence" && evt.value == "present")) {
 			PersonVPresenceC.arrived()
 			sendEvent(linkText:app.label, name:"${settings.PersonVPresenceC.name}", value:"present",descriptionText:"${settings.PersonVPresenceC.name} is present due to ${evt.name}", eventType:"SOLUTION_EVENT", displayed: true)
 			log.trace "${settings.PersonVPresenceC.name} is present due to ${evt.name}"
@@ -1145,7 +1145,7 @@ def eventHandlerD(evt) {
 		}
 	}
 	else {
-		if ((evt.name == "acceleration" && evt.value == "active") || (evt.name == "contact" && evt.value == settings.PersonContactDetailsD) || (evt.name == "lock" && evt.value == "unlocked" && evt.data.replaceAll("\\D+","") == PersonLockDetailsD) || (evt.name == "motion" && evt.value == "active") || (evt.name == "presence" && evt.value == "present")) {
+		if ((evt.name == "acceleration" && evt.value == "active") || (evt.name == "contact" && evt.value == settings.PersonContactDetailsD) || (evt.name == "lock" && evt.value == "unlocked" && evt.descriptionText.contains("${PersonLockDetailsD}")) || (evt.name == "motion" && evt.value == "active") || (evt.name == "presence" && evt.value == "present")) {
 			PersonVPresenceD.arrived()
 			sendEvent(linkText:app.label, name:"${settings.PersonVPresenceD.name}", value:"present",descriptionText:"${settings.PersonVPresenceD.name} is present due to ${evt.name}", eventType:"SOLUTION_EVENT", displayed: true)
 			log.trace "${settings.PersonVPresenceD.name} is present due to ${evt.name}"
@@ -1171,7 +1171,7 @@ def eventHandlerE(evt) {
 		}
 	}
 	else {
-		if ((evt.name == "acceleration" && evt.value == "active") || (evt.name == "contact" && evt.value == settings.PersonContactDetailsE) || (evt.name == "lock" && evt.value == "unlocked" && evt.data.replaceAll("\\D+","") == PersonLockDetailsE) || (evt.name == "motion" && evt.value == "active") || (evt.name == "presence" && evt.value == "present")) {
+		if ((evt.name == "acceleration" && evt.value == "active") || (evt.name == "contact" && evt.value == settings.PersonContactDetailsE) || (evt.name == "lock" && evt.value == "unlocked" && evt.descriptionText.contains("${PersonLockDetailsE}")) || (evt.name == "motion" && evt.value == "active") || (evt.name == "presence" && evt.value == "present")) {
 			PersonVPresenceE.arrived()
 			sendEvent(linkText:app.label, name:"${settings.PersonVPresenceE.name}", value:"present",descriptionText:"${settings.PersonVPresenceE.name} is present due to ${evt.name}", eventType:"SOLUTION_EVENT", displayed: true)
 			log.trace "${settings.PersonVPresenceE.name} is present due to ${evt.name}"
@@ -1197,7 +1197,7 @@ def eventHandlerF(evt) {
 		}
 	}
 	else {
-		if ((evt.name == "acceleration" && evt.value == "active") || (evt.name == "contact" && evt.value == settings.PersonContactDetailsF) || (evt.name == "lock" && evt.value == "unlocked" && evt.data.replaceAll("\\D+","") == PersonLockDetailsF) || (evt.name == "motion" && evt.value == "active") || (evt.name == "presence" && evt.value == "present")) {
+		if ((evt.name == "acceleration" && evt.value == "active") || (evt.name == "contact" && evt.value == settings.PersonContactDetailsF) || (evt.name == "lock" && evt.value == "unlocked" && evt.descriptionText.contains("${PersonLockDetailsF}")) || (evt.name == "motion" && evt.value == "active") || (evt.name == "presence" && evt.value == "present")) {
 			PersonVPresenceF.arrived()
 			sendEvent(linkText:app.label, name:"${settings.PersonVPresenceF.name}", value:"present",descriptionText:"${settings.PersonVPresenceF.name} is present due to ${evt.name}", eventType:"SOLUTION_EVENT", displayed: true)
 			log.trace "${settings.PersonVPresenceF.name} is present due to ${evt.name}"
