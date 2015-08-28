@@ -19,6 +19,7 @@
  *	Version: 1.3 - Minor formating tweaks, removed all static data from json
  *	Version: 2.0 - Addeded 3 day forcast and more formating and presentation tweaks. Removed weather station requirement
  *	Version: 2.1 - Preloads images for smoother transitions
+ *	Version: 2.1.1 - Added dynamic API URL
  *
  */
 definition(
@@ -414,12 +415,12 @@ private def generateURL(data) {
 			log.error ex
 		}
     }
-	def url = "https://graph.api.smartthings.com/api/smartapps/installations/${app.id}/${data}?access_token=${state.accessToken}"
-	return "$url"
+	def url = "${getApiServerUrl()}/api/smartapps/installations/${app.id}/${data}?access_token=${state.accessToken}"
+return "$url"
 }
 
 private def textVersion() {
-    def text = "Version 2.1"
+    def text = "Version 2.1.1"
 }
 
 private def textCopyright() {
