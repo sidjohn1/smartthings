@@ -14,6 +14,7 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *	Version: 1.0 - Initial Version
+ *	Version: 1.0.1 - Added dynamic API URL
  *
  */
 definition(
@@ -304,12 +305,12 @@ private def generateURL(data) {
 			log.error ex
 		}
     }
-	def url = "https://graph.api.smartthings.com/api/smartapps/installations/${app.id}/${data}?access_token=${state.accessToken}"
+	def url = "${getApiServerUrl()}/api/smartapps/installations/${app.id}/${data}?access_token=${state.accessToken}"
     return "$url"
 }
 
 private def textVersion() {
-    def text = "Version 1.0"
+    def text = "Version 1.0.1"
 }
 
 private def textCopyright() {
