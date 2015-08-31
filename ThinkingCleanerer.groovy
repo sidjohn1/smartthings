@@ -17,6 +17,7 @@
  *	Version: 1.2 - Added error push notifcation, and better icons
  *	Version: 1.3 - New interface, better polling, and logging. Added sms notifcations
  *	Version: 1.4 - Added bin full notifcations
+ *	Version: 1.4.1 - Fixed SMS send issue
  */
  
 definition(
@@ -96,7 +97,7 @@ def eventHandler(evt) {
 			msg = "${evt.displayName} has an error"
 			if (sendRoombaError == true) {
 				if (settings.sendSMS != null) {
-					sendSms(phoneNumber, msg) 
+					sendSms(sendSMS, msg) 
 				}
 				if (settings.sendPush == true) {
 					sendPush(msg)
@@ -111,7 +112,7 @@ def eventHandler(evt) {
         	schedule("15 0/1 * 1/1 * ?", pollOn)
 			if (sendRoombaOn == true) {
 				if (settings.sendSMS != null) {
-					sendSms(phoneNumber, msg) 
+					sendSms(sendSMS, msg) 
 				}
 				if (settings.sendPush == true) {
 					sendPush(msg)
@@ -124,7 +125,7 @@ def eventHandler(evt) {
 			msg = "${evt.displayName} bin is full"
 			if (sendRoombaBin == true) {
 				if (settings.sendSMS != null) {
-					sendSms(phoneNumber, msg) 
+					sendSms(sendSMS, msg) 
 				}
 				if (settings.sendPush == true) {
 					sendPush(msg)
@@ -132,13 +133,13 @@ def eventHandler(evt) {
 			}
 		break;
         
-		default:
+		case "off":
 			sendEvent(linkText:app.label, name:"${evt.displayName}", value:"off",descriptionText:"${evt.displayName} is off", eventType:"SOLUTION_EVENT", displayed: true)
 			log.trace "${evt.displayName} is off"
 			msg = "${evt.displayName} is off"
 			if (sendRoombaOff == true) {
 				if (settings.sendSMS != null) {
-					sendSms(phoneNumber, msg) 
+					sendSms(sendSMS, msg) 
 				}
 				if (settings.sendPush == true) {
 					sendPush(msg)
@@ -191,7 +192,7 @@ def pollErr() {
 	}
 }
 private def textVersion() {
-    def text = "Version 1.4"
+    def text = "Version 1.4.1"
 }
 
 private def textCopyright() {
