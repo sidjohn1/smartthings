@@ -20,6 +20,7 @@
  *	Version: 1.2 - Added error tracking, and better icons, link state
  *	Version: 1.3 - Better error tracking, error correction and the ability to change the default port (thx to sidhartha100), fix a bug that prevented auto population of deviceNetworkId
  *	Version: 1.4 - Added bin status and code clean up
+  *	Version: 1.4.1 - Added poll on inilizition, better error handling, inproved clean button
  *
  */
 import groovy.json.JsonSlurper
@@ -32,6 +33,7 @@ metadata {
 		capability "Switch"
 		capability "Tone"
         
+		command "refresh"
 		command "spot"
 
 		attribute "network","string"
@@ -40,12 +42,13 @@ metadata {
     
 	preferences {
 		input("ip", "text", title: "IP Address", description: "Your Thinking Cleaner Address", required: true, displayDuringSetup: true)
-		input("port", "number", title: "Port Number", description: "Your Thinking Cleaner Port Number", defaultValue: "80", required: true, displayDuringSetup: true)
+		input("port", "number", title: "Port Number", description: "Your Thinking Cleaner Port Number (Default:80)", defaultValue: "80", required: true, displayDuringSetup: true)
 	}
 
 	tiles {
 		valueTile("battery", "device.battery", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
-			state ("default", label:'${currentValue}% battery', unit:"percent", backgroundColors: [
+//			state ("default", label:' \u0003\u0003\u0003\u0003\u0003 \u0003\u0003\u0003\u0003\u0003 ...${currentValue}% \u0003\u0003\u0003\u0003', icon:"st.samsung.da.RC_ic_charge", backgroundColors: [
+			state ("default", label:'${currentValue}% Battery', icon:"", backgroundColors: [
 				[value: 20, color: "#bc2323"],
 				[value: 50, color: "#ffff00"],
 				[value: 96, color: "#79b821"]
@@ -60,10 +63,8 @@ metadata {
 			state ("full", label:'Bin Full', icon: "st.Kids.kids19", backgroundColor: "#bc2323")
 		}
 		standardTile("clean", "device.switch", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
-			state("on", label: 'clean', action: "switch.on", icon: "st.Appliances.appliances13", backgroundColor: "#79b821")
-		}
-		standardTile("dock", "device.switch", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
-			state("off", label: 'dock', action: "switch.off", icon: "st.Appliances.appliances13", backgroundColor: "#79b821")
+			state("on", label: 'dock', action: "switch.off", icon: "st.Appliances.appliances13", backgroundColor: "#79b821", nextState:"off")
+			state("off", label: 'clean', action: "switch.on", icon: "st.Appliances.appliances13", backgroundColor: "#79b821", nextState:"on")
 		}
 		standardTile("network", "device.network", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
 			state ("default", label:'unknown', icon: "st.unknown.unknown.unknown")
@@ -86,7 +87,7 @@ metadata {
 			state ("waiting", label:'${currentValue}', icon: "st.Appliances.appliances13")
 		}
 		main("clean")
-			details(["clean","spot","dock","battery","status","bin","network","beep","refresh"])
+			details(["clean","spot","status","battery","bin","network","beep","refresh"])
 		}
 }
 
@@ -97,7 +98,7 @@ def parse(String description) {
 	def bodyString
 	def slurper
 	def result
-    
+
 	map = stringToMap(description)
 	headerString = new String(map.headers.decodeBase64())
 	if (headerString.contains("200 OK")) {
@@ -111,6 +112,12 @@ def parse(String description) {
 			case "full_status":
 				sendEvent(name: 'network', value: "Connected" as String)
 				sendEvent(name: 'battery', value: result.power_status.battery_charge as Integer)
+				if (temperatureScale == "F") {
+					sendEvent(name: 'temperature', value: Math.round(cToF(result.power_status.temperature)) as Integer)
+				}
+				else {
+					sendEvent(name: 'temperature', value: result.power_status.temperature as Integer)
+				}
 			switch (result.tc_status.bin_status) {
 				case "0":
 					sendEvent(name: 'bin', value: "empty" as String)
@@ -141,7 +148,7 @@ def parse(String description) {
 					sendEvent(name: 'switch', value: "off" as String)
 				break;
 				case "st_clean":
-					if (result.power_status.cleaning == "1"){
+					if (result.tc_status.cleaning == 1){
 						sendEvent(name: 'status', value: "cleaning" as String)
 						sendEvent(name: 'switch', value: "on" as String)
 					}
@@ -152,7 +159,7 @@ def parse(String description) {
 					}
 				break;
 				case "st_clean_spot":
-					if (result.power_status.cleaning == "1"){
+					if (result.tc_status.cleaning == 1){
 						sendEvent(name: 'status', value: "cleaning" as String)
 						sendEvent(name: 'switch', value: "on" as String)
 					}
@@ -163,7 +170,7 @@ def parse(String description) {
 					}
 				break;
 				case "st_clean_max":
-					if (result.power_status.cleaning == "1"){
+					if (result.tc_status.cleaning == 1){
 						sendEvent(name: 'status', value: "cleaning" as String)
 						sendEvent(name: 'switch', value: "on" as String)
 					}
@@ -174,7 +181,7 @@ def parse(String description) {
 					}
 				break;
 				case "st_dock":
-					if (result.power_status.cleaning == "1"){
+					if (result.tc_status.cleaning == 1){
 						sendEvent(name: 'status', value: "docking" as String)
 						sendEvent(name: 'switch', value: "on" as String)
 					}
@@ -216,6 +223,7 @@ def updated() {
 def initialize() {
 	log.info "Thinking Cleaner ${textVersion()} ${textCopyright()}"
 	ipSetup()
+	poll()
 }
 
 def on() {
@@ -237,7 +245,18 @@ def spot() {
 
 def poll() {
 	log.debug "Executing 'poll'"
-	api('refresh')
+    
+	if (device.deviceNetworkId != null) {
+		api('refresh')
+		device.activity()
+	}
+    else {
+		sendEvent(name: 'status', value: "error" as String)
+		sendEvent(name: 'network', value: "Not Connected" as String)
+		log.debug "DNI: Not set"
+    }
+    
+
 }
 
 def refresh() {
@@ -304,7 +323,7 @@ def api(String rooCommand, success = {}) {
 				method: "GET",
 				path: rooPath,
 				headers: [HOST: "${settings.ip}:${settings.port}", Accept: "application/json"]
-				), delayAction(9900), api('refresh')]
+				), delayAction(9800), api('refresh')]
 			}
 			catch (Exception e) {
 				log.debug "Hit Exception $e on $hubAction"
@@ -328,6 +347,10 @@ def ipSetup() {
 	}
 }
 
+def cToF(temp) {
+	return (temp * 1.8 + 32).toDouble()
+}
+
 private String convertIPtoHex(ip) { 
 	String hexip = ip.tokenize( '.' ).collect {  String.format( '%02x', it.toInteger() ) }.join()
 	return hexip
@@ -340,22 +363,8 @@ private delayAction(long time) {
 	new physicalgraph.device.HubAction("delay $time")
 }
 
-private def generateURL() {    
-	if (!state.accessToken) {
-		try {
-			createAccessToken()
-			log.debug "Creating new Access Token: $state.accessToken"
-		} catch (e) {
-			log.error "Enable OAuth in SmartApp IDE settings for Thinking Cleaner"
-			log.error e
-		}
-    }
-	def url = "/api/smartapps/installations/${app.id}/u?access_token=${state.accessToken}"
-	return "$url"
-}
-
 private def textVersion() {
-    def text = "Version 1.4"
+    def text = "Version 1.4.1"
 }
 
 private def textCopyright() {
