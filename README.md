@@ -2,7 +2,7 @@ SmartThings
 =====================
 
 A collection of code for smartthings
-If you find this code usefull, please support the developer via PayPal:<br/> [![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif) sidjohn1@gmail.com](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XKDRYZ3RUNR9Y)
+If you find this code usefull or you need assistance using this code, please support the developer via PayPal:<br/> [![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif) sidjohn1@gmail.com](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XKDRYZ3RUNR9Y)
 
 <h2>Details:</h2>
 <b>TimelyPresence:</b> Smartthings smartapp that displays the current local time and the presence of the members of the house as the background. Images change from greyscale to color indicating presence.<br>
