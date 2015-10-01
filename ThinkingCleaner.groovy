@@ -20,7 +20,8 @@
  *	Version: 1.2 - Added error tracking, and better icons, link state
  *	Version: 1.3 - Better error tracking, error correction and the ability to change the default port (thx to sidhartha100), fix a bug that prevented auto population of deviceNetworkId
  *	Version: 1.4 - Added bin status and code clean up
-  *	Version: 1.4.1 - Added poll on inilizition, better error handling, inproved clean button
+ *	Version: 1.4.1 - Added poll on inilizition, better error handling, inproved clean button
+ *	Version: 1.4.2 - Fixed poll not working, changed battery icon, and code clean up
  *
  */
 import groovy.json.JsonSlurper
@@ -47,8 +48,8 @@ metadata {
 
 	tiles {
 		valueTile("battery", "device.battery", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
-//			state ("default", label:' \u0003\u0003\u0003\u0003\u0003 \u0003\u0003\u0003\u0003\u0003 ...${currentValue}% \u0003\u0003\u0003\u0003', icon:"st.samsung.da.RC_ic_charge", backgroundColors: [
-			state ("default", label:'${currentValue}% Battery', icon:"", backgroundColors: [
+			state ("default", label:' \u0003\u0003\u0003\u0003\u0003 \u0003\u0003\u0003\u0003\u0003 ...${currentValue}% \u0003\u0003\u0003\u0003', icon:"st.samsung.da.RC_ic_charge", backgroundColors: [
+//			state ("default", label:'${currentValue}% Battery', icon:"", backgroundColors: [
 				[value: 20, color: "#bc2323"],
 				[value: 50, color: "#ffff00"],
 				[value: 96, color: "#79b821"]
@@ -62,7 +63,7 @@ metadata {
 			state ("empty", label:'Bin Empty', icon: "st.Kids.kids10", backgroundColor: "#79b821")
 			state ("full", label:'Bin Full', icon: "st.Kids.kids19", backgroundColor: "#bc2323")
 		}
-		standardTile("clean", "device.switch", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
+		standardTile("clean", "device.switch", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false, decoration: "flat") {
 			state("on", label: 'dock', action: "switch.off", icon: "st.Appliances.appliances13", backgroundColor: "#79b821", nextState:"off")
 			state("off", label: 'clean', action: "switch.on", icon: "st.Appliances.appliances13", backgroundColor: "#79b821", nextState:"on")
 		}
@@ -71,7 +72,7 @@ metadata {
 			state ("Connected", label:'Link Good', icon: "st.Appliances.appliances13", backgroundColor: "#79b821")
 			state ("Not Connected", label:'Link Bad', icon: "st.Appliances.appliances13", backgroundColor: "#bc2323")
 		}
-		standardTile("spot", "device.spot", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
+		standardTile("spot", "device.spot", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false, decoration: "flat") {
 			state("spot", label: 'spot', action: "spot", icon: "st.Appliances.appliances13", backgroundColor: "#79b821")
 		}
 		standardTile("refresh", "device.switch", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false, decoration: "flat") {
@@ -112,12 +113,6 @@ def parse(String description) {
 			case "full_status":
 				sendEvent(name: 'network', value: "Connected" as String)
 				sendEvent(name: 'battery', value: result.power_status.battery_charge as Integer)
-				if (temperatureScale == "F") {
-					sendEvent(name: 'temperature', value: Math.round(cToF(result.power_status.temperature)) as Integer)
-				}
-				else {
-					sendEvent(name: 'temperature', value: result.power_status.temperature as Integer)
-				}
 			switch (result.tc_status.bin_status) {
 				case "0":
 					sendEvent(name: 'bin', value: "empty" as String)
@@ -248,15 +243,12 @@ def poll() {
     
 	if (device.deviceNetworkId != null) {
 		api('refresh')
-		device.activity()
 	}
     else {
 		sendEvent(name: 'status', value: "error" as String)
 		sendEvent(name: 'network', value: "Not Connected" as String)
 		log.debug "DNI: Not set"
     }
-    
-
 }
 
 def refresh() {
@@ -347,10 +339,6 @@ def ipSetup() {
 	}
 }
 
-def cToF(temp) {
-	return (temp * 1.8 + 32).toDouble()
-}
-
 private String convertIPtoHex(ip) { 
 	String hexip = ip.tokenize( '.' ).collect {  String.format( '%02x', it.toInteger() ) }.join()
 	return hexip
@@ -364,7 +352,7 @@ private delayAction(long time) {
 }
 
 private def textVersion() {
-    def text = "Version 1.4.1"
+    def text = "Version 1.4.2"
 }
 
 private def textCopyright() {
