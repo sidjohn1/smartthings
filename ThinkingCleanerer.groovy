@@ -18,6 +18,7 @@
  *	Version: 1.3 - New interface, better polling, and logging. Added sms notifcations
  *	Version: 1.4 - Added bin full notifcations
  *	Version: 1.4.1 - Fixed SMS send issue
+ *	Version: 1.4.2 - Fixed No such property: currentSwitch issue, added poll on initialize, locked to single instance
  */
  
 definition(
@@ -28,7 +29,8 @@ definition(
 	category: "Convenience",
 	iconUrl: "http://cdn.device-icons.smartthings.com/Appliances/appliances13-icn.png",
 	iconX2Url: "http://cdn.device-icons.smartthings.com/Appliances/appliances13-icn@2x.png",
-	iconX3Url: "http://cdn.device-icons.smartthings.com/Appliances/appliances13-icn@3x.png")
+	iconX3Url: "http://cdn.device-icons.smartthings.com/Appliances/appliances13-icn@3x.png",
+	singleInstance: true)
 
 preferences {
 	page name:"pageInfo"
@@ -86,6 +88,8 @@ def initialize() {
 	subscribe(switch1, "switch.off", eventHandler)
 	subscribe(switch1, "status.error", eventHandler)
 	subscribe(switch1, "bin.full", eventHandler)
+    pollOff
+    schedule("22 4 0/1 1/1 * ? *", pollOff)
 }
 
 def eventHandler(evt) {
@@ -151,7 +155,7 @@ def eventHandler(evt) {
 }
 
 def pollOn() {
-	def onSwitch1 = switch1.currentSwitch.findAll { switchVal ->
+	def onSwitch1 = settings.switch1.currentSwitch.findAll { switchVal ->
 		switchVal == "on" ? true : false
 	}
 	settings.switch1.each() {
@@ -165,7 +169,7 @@ def pollOn() {
 }
 
 def pollOff() {
-	def offSwitch1 = switch1.currentSwitch.findAll { switchVal ->
+    def offSwitch1 = settings.switch1.currentSwitch.findAll { switchVal ->
 		switchVal == "off" ? true : false
 	}
 	settings.switch1.each() {
@@ -179,7 +183,7 @@ def pollOff() {
 }
 
 def pollErr() {
-	def errSwitch1 = switch1.currentStatus.findAll { switchVal ->
+	def errSwitch1 = settings.switch1.currentStatus.findAll { switchVal ->
 		switchVal == "error" ? true : false
 	}
 	settings.switch1.each() {
@@ -192,7 +196,7 @@ def pollErr() {
 	}
 }
 private def textVersion() {
-    def text = "Version 1.4.1"
+    def text = "Version 1.4.2"
 }
 
 private def textCopyright() {
