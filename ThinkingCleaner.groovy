@@ -92,7 +92,6 @@ metadata {
 		}
 }
 
-// parse events into attributes
 def parse(String description) {
 	def map
 	def headerString
