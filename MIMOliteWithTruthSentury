@@ -1,0 +1,162 @@
+/**
+ *  Copyright 2015 SmartThings
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ *	Version: 1.0 - Initial Version
+ */
+metadata {
+	definition (name: "MIMOlite with Truth Sentury", namespace: "smartthings", author: "SmartThings") {
+		capability "Actuator"
+		capability "Contact Sensor"
+		capability "Switch"
+		capability "Polling"
+		capability "Refresh"
+		capability "Sensor"
+
+		fingerprint deviceId: "0x1000", inClusters: "0x72,0x86,0x71,0x30,0x31,0x35,0x70,0x85,0x25,0x03"
+	}
+
+	// tile definitions
+	tiles(scale: 2) {
+		multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4, canChangeIcon: true){
+			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+				attributeState "on", label: "opened", action: "switch.off", icon: "st.contact.contact.open", backgroundColor: "#79b821", nextState:"closing"
+				attributeState "off", label: "closed", action: "switch.on", icon: "st.contact.contact.closed", backgroundColor: "#ffffff", nextState:"opening"
+				attributeState "opening", label: "opening", action: "switch.off", icon: "st.contact.contact.open", backgroundColor: "#FFC125"
+				attributeState "closing", label: "closing", action: "switch.on", icon: "st.contact.contact.closed", backgroundColor: "#FFC125"
+			}
+		}
+		standardTile("refresh", "device.switch", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
+		}
+
+		main "switch"
+		details(["switch","refresh"])
+	}
+}
+
+def parse(String description) {
+	def result = null
+	def cmd = zwave.parse(description, [0x20: 1, 0x70: 1])
+	if (cmd) {
+		result = createEvent(zwaveEvent(cmd))
+	}
+	if (result?.name == 'hail' && hubFirmwareLessThan("000.011.00602")) {
+		result = [result, response(zwave.basicV1.basicGet())]
+		log.debug "Was hailed: requesting state update"
+	} else {
+		log.debug "Parse returned ${result?.descriptionText}"
+	}
+	return result
+}
+
+def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicReport cmd) {
+	[name: "switch", value: cmd.value ? "on" : "off", type: "physical"]
+	if (cmd.value == 0) {
+		sendEvent(name: 'contact', value: "closed" as String)
+		sendEvent(name: 'switch', value: "off" as String)
+	}
+	else {
+		sendEvent(name: 'contact', value: "open" as String)
+		sendEvent(name: 'switch', value: "on" as String)
+	}
+}
+
+def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicSet cmd) {
+	[name: "switch", value: cmd.value ? "on" : "off", type: "physical"]
+	if (cmd.value == 0) {
+		sendEvent(name: 'contact', value: "closed" as String)
+		sendEvent(name: 'switch', value: "off" as String)
+  } 
+	else {
+		sendEvent(name: 'contact', value: "open" as String)
+		sendEvent(name: 'switch', value: "on" as String)
+	}
+}
+
+def zwaveEvent(physicalgraph.zwave.commands.switchbinaryv1.SwitchBinaryReport cmd) {
+	[name: "switch", value: cmd.value ? "on" : "off", type: "digital"]
+	if (cmd.value == 0) {
+		sendEvent(name: 'contact', value: "closed" as String)
+		sendEvent(name: 'switch', value: "off" as String)
+	} 
+	else {
+		sendEvent(name: 'contact', value: "open" as String)
+		sendEvent(name: 'switch', value: "on" as String)
+	}
+}
+
+def zwaveEvent(physicalgraph.zwave.commands.configurationv1.ConfigurationReport cmd) {
+	def value = "when off"
+	if (cmd.configurationValue[0] == 1) {value = "when on"}
+	if (cmd.configurationValue[0] == 2) {value = "never"}
+	[name: "indicatorStatus", value: value, display: false]
+}
+
+def zwaveEvent(physicalgraph.zwave.commands.hailv1.Hail cmd) {
+	[name: "hail", value: "hail", descriptionText: "Switch button was pressed", displayed: false]
+}
+
+def zwaveEvent(physicalgraph.zwave.commands.manufacturerspecificv2.ManufacturerSpecificReport cmd) {
+	if (state.manufacturer != cmd.manufacturerName) {
+		updateDataValue("manufacturer", cmd.manufacturerName)
+	}
+}
+
+def zwaveEvent(physicalgraph.zwave.Command cmd) {
+	// Handles all Z-Wave commands we aren't interested in
+	[:]
+}
+
+def on() {
+	delayBetween([
+		zwave.basicV1.basicSet(value: 0xFF).format(),
+		zwave.switchBinaryV1.switchBinaryGet().format()
+	], 15000)
+//	sendEvent(name: 'contact', value: "open" as String)
+}
+
+def off() {
+	delayBetween([
+		zwave.basicV1.basicSet(value: 0x00).format(),
+		zwave.switchBinaryV1.switchBinaryGet().format()
+	], 15000)
+//	sendEvent(name: 'contact', value: "closed" as String)
+}
+
+def poll() {
+	delayBetween([
+		zwave.switchBinaryV1.switchBinaryGet().format(),
+		zwave.manufacturerSpecificV1.manufacturerSpecificGet().format(),
+		zwave.sensorBinaryV1.sensorBinaryGet().format(),
+		zwave.basicV1.basicGet().format(),
+		zwave.alarmV1.alarmGet().format() 
+	],100)
+}
+
+def refresh() {
+	delayBetween([
+		zwave.switchBinaryV1.switchBinaryGet().format(),
+		zwave.manufacturerSpecificV1.manufacturerSpecificGet().format(),
+		zwave.sensorBinaryV1.sensorBinaryGet().format(),
+		zwave.basicV1.basicGet().format(),
+		zwave.alarmV1.alarmGet().format() 
+	],100)
+}
+
+def invertSwitch(invert=true) {
+	if (invert) {
+		zwave.configurationV1.configurationSet(configurationValue: [1], parameterNumber: 4, size: 1).format()
+	}
+	else {
+		zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 4, size: 1).format()
+	}
+}
