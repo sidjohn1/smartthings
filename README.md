@@ -32,9 +32,10 @@ If you find this code usefull or you need assistance using this code, please sup
 <img src='http://sidjohn1.github.io/smartthings/smartapp.gif'><br>
 <b>How do i run SmartSetup to install a smartapp after it has been added to Smartthings and make it run?</b>
 <ol type="1">
-  <li>Open the Smartthings app on your mobile device (smart phone, table, chrome extention)</li>
-  <li>Click "+" at the very botton of the list</li>
-  <li>At the top where you see "Things" and "Alerts" scroll right till you reach "My Apps"</li>
+  <li>Open the Smartthings app on your mobile device (smart phone, tablet, chrome extention)</li>
+  <li>Touch the "Marketplace *" icon on the lower left </li>
+  <li>Touch SmartApps on the upper left </li>  
+  <li>Scroll down till you reach "My Apps"</li>
   <li>Scroll down till you find the app you want to install and touch it</li>
   <li>Enter the requested data and touch "Done"</li>
 </ol>
