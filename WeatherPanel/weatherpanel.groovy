@@ -20,6 +20,7 @@
  *	Version: 2.0 - Addeded 3 day forcast and more formating and presentation tweaks. Removed weather station requirement
  *	Version: 2.1 - Preloads images for smoother transitions
  *	Version: 2.1.1 - Added dynamic API URL
+ *	Version: 2.2 - Added support for user selectable Station ID
  *
  */
 definition(
@@ -47,6 +48,7 @@ def selectDevices() {
 		section("Select...") {
 			input "insideTemp", "capability.temperatureMeasurement", title: "Inside Tempature...", multiple: false, required: true
 			input "showForcast", "bool", title:"Show Forcast", required: false, multiple:false
+            input "stationID", "text", title:"Station ID (Optional)", required: false, multiple:false
 		}
 		section(hideable: true, hidden: true, "Optional Settings") {
         	input "fontColor", "bool", title: "Font Color Black", required: false
@@ -328,7 +330,7 @@ ${weatherDataContent}
     			\$(content).appendTo("#data");
     		});
     	});
-    	setTimeout(weatherData, 480000);
+    	setTimeout(weatherData, 240000);
 	}
 	weatherData();
 });
@@ -359,7 +361,11 @@ def temperatureScale = getTemperatureScale()
 
 def weatherIcons = []
 
-if (settings.zipcode) {
+if (settings.stationID) {
+	forecast = getWeatherFeature("forecast", "pws:"+settings.stationID)
+	current = getWeatherFeature("conditions", "pws:"+settings.stationID)
+}
+else if (settings.zipcode) {
 	forecast = getWeatherFeature("forecast", settings.zipcode)
 	current = getWeatherFeature("conditions", settings.zipcode)
 }
@@ -420,7 +426,7 @@ return "$url"
 }
 
 private def textVersion() {
-    def text = "Version 2.1.1"
+    def text = "Version 2.2"
 }
 
 private def textCopyright() {
