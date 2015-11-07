@@ -16,6 +16,7 @@
  *
  *	Version 1.0 - Original release
  *	Version 1.0.1 - Number input bug fix, code clean up
+ *	Version 1.1 - Upgraded Logic
  */
 definition(
 	name: "Presence Manager",
@@ -1050,15 +1051,29 @@ def initialize() {
 }
 
 def eventHandlerA(evt) {
+	atomicState.statusA = 0 
+	if (evt.name == "contact" && evt.value == settings.PersonContactDetailsA) {
+		state.lastChangedA = now()
+    }
 	if (settings.PersonVPresenceA.currentPresence == "present") {
 		if (evt.name == "acceleration" && evt.value == "inactive" && PersonAccelerationDetailsA.toInteger() > 0) {
-			runIn(settings.PersonAccelerationDetailsA.toInteger()*60, PersonSchedeuleA, [overwrite: true])
+			runIn(settings.PersonAccelerationDetailsA.toInteger()*60, "PersonSchedeuleA", [overwrite: true])
 		}
 		if (evt.name == "motion" && evt.value == "inactive" && PersonMotionDetailsA.toInteger() > 0) {
-			runIn(settings.PersonMotionDetailsA.toInteger()*60, PersonSchedeuleA, [overwrite: true])
+			runIn(settings.PersonMotionDetailsA.toInteger()*60, "PersonSchedeuleA", [overwrite: true])
 		}
 		if (evt.name == "presence" && evt.value == "not present") {
-			if (settings.PersonAccelerationA != "active" && settings.PersonMotionA != "active" && settings.PersonContactA != settings.PersonContactDetailsA) {
+        	if (settings.PersonAccelerationA && settings.PersonAccelerationA.currentAcceleration == "active") {
+            	atomicState.statusA = atomicState.statusA+1
+            }
+			if (settings.PersonMotionA && settings.PersonMotionA.currentMotion == "active") {
+            	atomicState.statusA = atomicState.statusA+1
+            }
+			if (settings.PersonContactA && settings.PersonContactA.currentContact == settings.PersonContactDetailsA) {
+            	atomicState.statusA = atomicState.statusA+1
+            }
+			log.debug "${atomicState.statusA}"
+			if (atomicState.statusA == 0) {
 				unschedule(PersonMotionSchedeuleA)
 				PersonVPresenceA.departed()
 				sendEvent(linkText:app.label, name:"${settings.PersonVPresenceA.name}", value:"absent",descriptionText:"${settings.PersonVPresenceA.name} is absent due to ${evt.name}", eventType:"SOLUTION_EVENT", displayed: true)
@@ -1076,16 +1091,28 @@ def eventHandlerA(evt) {
 }
 
 def eventHandlerB(evt) {
+	if (evt.name == "contact" && evt.value == settings.PersonContactDetailsB) {
+		state.lastChangedB = now()
+    }
 	if (settings.PersonVPresenceB.currentPresence == "present") {
 		if (evt.name == "acceleration" && evt.value == "inactive" && PersonAccelerationDetailsB.toInteger() > 0) {
-			runIn(settings.PersonAccelerationDetailsB.toInteger()*60, PersonSchedeuleB, [overwrite: true])
+			runIn(settings.PersonAccelerationDetailsB.toInteger()*60, "PersonSchedeuleB", [overwrite: true])
 		}
 		if (evt.name == "motion" && evt.value == "inactive" && PersonMotionDetailsB.toInteger() > 0) {
-			runIn(settings.PersonMotionDetailsB.toInteger()*60, PersonSchedeuleB, [overwrite: true])
+			runIn(settings.PersonMotionDetailsB.toInteger()*60, "PersonSchedeuleB", [overwrite: true])
 		}
 		if (evt.name == "presence" && evt.value == "not present") {
-			if (settings.PersonAccelerationB != "active" && settings.PersonMotionB != "active" && settings.PersonContactB != settings.PersonContactDetailsB) {
-				unschedule(PersonSchedeuleB)
+        	if (settings.PersonAccelerationB && settings.PersonAccelerationB.currentAcceleration == "active") {
+            	atomicState.statusB = atomicState.statusB+1
+            }
+			if (settings.PersonMotionB && settings.PersonMotionB.currentMotion == "active") {
+            	atomicState.statusB = atomicState.statusB+1
+            }
+			if (settings.PersonContactB && settings.PersonContactB.currentContact == settings.PersonContactDetailsB) {
+            	atomicState.statusB = atomicState.statusB+1
+            }
+			if (atomicState.statusB == 0) {
+				unschedule(PersonMotionSchedeuleB)
 				PersonVPresenceB.departed()
 				sendEvent(linkText:app.label, name:"${settings.PersonVPresenceB.name}", value:"absent",descriptionText:"${settings.PersonVPresenceB.name} is absent due to ${evt.name}", eventType:"SOLUTION_EVENT", displayed: true)
 				log.trace "${settings.PersonVPresenceB.name} is absent due to ${evt.name}"
@@ -1102,16 +1129,28 @@ def eventHandlerB(evt) {
 }
 
 def eventHandlerC(evt) {
+	if (evt.name == "contact" && evt.value == settings.PersonContactDetailsC) {
+		state.lastChangedC = now()
+    }
 	if (settings.PersonVPresenceC.currentPresence == "present") {
 		if (evt.name == "acceleration" && evt.value == "inactive" && PersonAccelerationDetailsC.toInteger() > 0) {
-			runIn(settings.PersonAccelerationDetailsC.toInteger()*60, PersonSchedeuleC, [overwrite: true])
+			runIn(settings.PersonAccelerationDetailsC.toInteger()*60, "PersonSchedeuleC", [overwrite: true])
 		}
 		if (evt.name == "motion" && evt.value == "inactive" && PersonMotionDetailsC.toInteger() > 0) {
-			runIn(settings.PersonMotionDetailsC.toInteger()*60, PersonSchedeuleC, [overwrite: true])
+			runIn(settings.PersonMotionDetailsC.toInteger()*60, "PersonSchedeuleC", [overwrite: true])
 		}
 		if (evt.name == "presence" && evt.value == "not present") {
-			if (settings.PersonAccelerationC != "active" && settings.PersonMotionC != "active" && settings.PersonContactC != settings.PersonContactDetailsC) {
-				unschedule(PersonSchedeuleC)
+        	if (settings.PersonAccelerationC && settings.PersonAccelerationC.currentAcceleration == "active") {
+            	atomicState.statusC = atomicState.statusC+1
+            }
+			if (settings.PersonMotionC && settings.PersonMotionC.currentMotion == "active") {
+            	atomicState.statusC = atomicState.statusC+1
+            }
+			if (settings.PersonContactC && settings.PersonContactC.currentContact == settings.PersonContactDetailsC) {
+            	atomicState.statusC = atomicState.statusC+1
+            }
+			if (atomicState.statusC == 0) {
+				unschedule(PersonMotionSchedeuleC)
 				PersonVPresenceC.departed()
 				sendEvent(linkText:app.label, name:"${settings.PersonVPresenceC.name}", value:"absent",descriptionText:"${settings.PersonVPresenceC.name} is absent due to ${evt.name}", eventType:"SOLUTION_EVENT", displayed: true)
 				log.trace "${settings.PersonVPresenceC.name} is absent due to ${evt.name}"
@@ -1128,16 +1167,28 @@ def eventHandlerC(evt) {
 }
 
 def eventHandlerD(evt) {
+	if (evt.name == "contact" && evt.value == settings.PersonContactDetailsD) {
+		state.lastChangedD = now()
+    }
 	if (settings.PersonVPresenceD.currentPresence == "present") {
 		if (evt.name == "acceleration" && evt.value == "inactive" && PersonAccelerationDetailsD.toInteger() > 0) {
-			runIn(settings.PersonAccelerationDetailsD.toInteger()*60, PersonSchedeuleD, [overwrite: true])
+			runIn(settings.PersonAccelerationDetailsD.toInteger()*60, "PersonSchedeuleD", [overwrite: true])
 		}
 		if (evt.name == "motion" && evt.value == "inactive" && PersonMotionDetailsD.toInteger() > 0) {
-			runIn(settings.PersonMotionDetailsD.toInteger()*60, PersonSchedeuleD, [overwrite: true])
+			runIn(settings.PersonMotionDetailsD.toInteger()*60, "PersonSchedeuleD", [overwrite: true])
 		}
 		if (evt.name == "presence" && evt.value == "not present") {
-			if (settings.PersonAccelerationD != "active" && settings.PersonMotionD != "active" && settings.PersonContactD != settings.PersonContactDetailsD) {
-				unschedule(PersonSchedeuleD)
+        	if (settings.PersonAccelerationD && settings.PersonAccelerationD.currentAcceleration == "active") {
+            	atomicState.statusD = atomicState.statusD+1
+            }
+			if (settings.PersonMotionD && settings.PersonMotionD.currentMotion == "active") {
+            	atomicState.statusD = atomicState.statusD+1
+            }
+			if (settings.PersonContactD && settings.PersonContactD.currentContact == settings.PersonContactDetailsD) {
+            	atomicState.statusD = atomicState.statusD+1
+            }
+			if (atomicState.statusD == 0) {
+				unschedule(PersonMotionSchedeuleD)
 				PersonVPresenceD.departed()
 				sendEvent(linkText:app.label, name:"${settings.PersonVPresenceD.name}", value:"absent",descriptionText:"${settings.PersonVPresenceD.name} is absent due to ${evt.name}", eventType:"SOLUTION_EVENT", displayed: true)
 				log.trace "${settings.PersonVPresenceD.name} is absent due to ${evt.name}"
@@ -1154,16 +1205,28 @@ def eventHandlerD(evt) {
 }
 
 def eventHandlerE(evt) {
+	if (evt.name == "contact" && evt.value == settings.PersonContactDetailsE) {
+		state.lastChangedE = now()
+    }
 	if (settings.PersonVPresenceE.currentPresence == "present") {
 		if (evt.name == "acceleration" && evt.value == "inactive" && PersonAccelerationDetailsE.toInteger() > 0) {
-			runIn(settings.PersonAccelerationDetailsE.toInteger()*60, PersonSchedeuleE, [overwrite: true])
+			runIn(settings.PersonAccelerationDetailsE.toInteger()*60, "PersonSchedeuleE", [overwrite: true])
 		}
 		if (evt.name == "motion" && evt.value == "inactive" && PersonMotionDetailsE.toInteger() > 0) {
-			runIn(settings.PersonMotionDetailsE.toInteger()*60, PersonSchedeuleE, [overwrite: true])
+			runIn(settings.PersonMotionDetailsE.toInteger()*60, "PersonSchedeuleE", [overwrite: true])
 		}
 		if (evt.name == "presence" && evt.value == "not present") {
-			if (settings.PersonAccelerationE != "active" && settings.PersonMotionE != "active" && settings.PersonContactE != settings.PersonContactDetailsE) {
-				unschedule(PersonSchedeuleE)
+        	if (settings.PersonAccelerationE && settings.PersonAccelerationE.currentAcceleration == "active") {
+            	atomicState.statusE = atomicState.statusE+1
+            }
+			if (settings.PersonMotionE && settings.PersonMotionE.currentMotion == "active") {
+            	atomicState.statusE = atomicState.statusE+1
+            }
+			if (settings.PersonContactE && settings.PersonContactE.currentContact == settings.PersonContactDetailsE) {
+            	atomicState.statusE = atomicState.statusE+1
+            }
+			if (atomicState.statusE == 0) {
+				unschedule(PersonMotionSchedeuleE)
 				PersonVPresenceE.departed()
 				sendEvent(linkText:app.label, name:"${settings.PersonVPresenceE.name}", value:"absent",descriptionText:"${settings.PersonVPresenceE.name} is absent due to ${evt.name}", eventType:"SOLUTION_EVENT", displayed: true)
 				log.trace "${settings.PersonVPresenceE.name} is absent due to ${evt.name}"
@@ -1180,16 +1243,28 @@ def eventHandlerE(evt) {
 }
 
 def eventHandlerF(evt) {
+	if (evt.name == "contact" && evt.value == settings.PersonContactDetailsF) {
+		state.lastChangedF = now()
+    }
 	if (settings.PersonVPresenceF.currentPresence == "present") {
 		if (evt.name == "acceleration" && evt.value == "inactive" && PersonAccelerationDetailsF.toInteger() > 0) {
-			runIn(settings.PersonAccelerationDetailsF.toInteger()*60, PersonSchedeuleF, [overwrite: true])
+			runIn(settings.PersonAccelerationDetailsF.toInteger()*60, "PersonSchedeuleF", [overwrite: true])
 		}
 		if (evt.name == "motion" && evt.value == "inactive" && PersonMotionDetailsF.toInteger() > 0) {
-			runIn(settings.PersonMotionDetailsF.toInteger()*60, PersonSchedeuleF, [overwrite: true])
+			runIn(settings.PersonMotionDetailsF.toInteger()*60, "PersonSchedeuleF", [overwrite: true])
 		}
 		if (evt.name == "presence" && evt.value == "not present") {
-			if (settings.PersonAccelerationF != "active" && settings.PersonMotionF != "active" && settings.PersonContactF != settings.PersonContactDetailsF) {
-				unschedule(PersonSchedeuleF)
+        	if (settings.PersonAccelerationF && settings.PersonAccelerationF.currentAcceleration == "active") {
+            	atomicState.statusF = atomicState.statusF+1
+            }
+			if (settings.PersonMotionF && settings.PersonMotionF.currentMotion == "active") {
+            	atomicState.statusF = atomicState.statusF+1
+            }
+			if (settings.PersonContactF && settings.PersonContactF.currentContact == settings.PersonContactDetailsF) {
+            	atomicState.statusF = atomicState.statusF+1
+            }
+			if (atomicState.statusF == 0) {
+				unschedule(PersonMotionSchedeuleF)
 				PersonVPresenceF.departed()
 				sendEvent(linkText:app.label, name:"${settings.PersonVPresenceF.name}", value:"absent",descriptionText:"${settings.PersonVPresenceF.name} is absent due to ${evt.name}", eventType:"SOLUTION_EVENT", displayed: true)
 				log.trace "${settings.PersonVPresenceF.name} is absent due to ${evt.name}"
@@ -1271,8 +1346,23 @@ private def nameText() {
 	text
 }
 
+private hasBeenRecentContact(deviceContact)
+{
+	def isActive = false
+	def deltaMinutes = minutes as Long
+	if (deltaMinutes) {
+		def contactEvents = deviceContact.eventsSince(new Date(now() - (60000 * 60)))
+		log.trace "Found ${contactEvents?.size() ?: 0} events in the last hour"
+		if (contactEvents.find { it.value == "active" }) {
+			isActive = true
+		}
+	}
+
+	isActive
+}
+
 private def textVersion() {
-	def text = "Version 1.0.1"
+	def text = "Version 1.1"
 }
 
 private def textCopyright() {
