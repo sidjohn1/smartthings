@@ -95,8 +95,8 @@ def initialize() {
 	subscribe(switch1, "bin.full", eventHandler)
 	subscribe(location, "sunset", pollRestart)
 	subscribe(location, "sunrise", pollRestart)
-    schedule("22 4 0/1 1/1 * ? *", pollOff)
-    pollOff
+	schedule("22 4 0/1 1/1 * ? *", pollOff)
+	pollOff
     
 }
 
@@ -121,7 +121,7 @@ def eventHandler(evt) {
 			sendEvent(linkText:app.label, name:"${evt.displayName}", value:"on",descriptionText:"${evt.displayName} is on", eventType:"SOLUTION_EVENT", displayed: true)
 			log.trace "${evt.displayName} is on"
 			msg = "${evt.displayName} is on"
-        	schedule("15 0/1 * 1/1 * ?", pollOn)
+			schedule("15 0/1 * 1/1 * ?", pollOn)
 			if (sendRoombaOn == true) {
 				if (settings.sendSMS != null) {
 					sendSms(sendSMS, msg) 
@@ -131,11 +131,11 @@ def eventHandler(evt) {
 				}
 			}
             if (settings.autoSHM.contains('true') ) {
-				if (location.currentState("alarmSystemStatus")?.value == "away"){
-                	sendEvent(linkText:app.label, name:"Smart Home Monitor", value:"stay",descriptionText:"Smart Home Monitor was set to stay", eventType:"SOLUTION_EVENT", displayed: true)
-					log.trace "Smart Home Monitor was set to stay"
-                	sendLocationEvent(name: "alarmSystemStatus", value: "stay")
-                    state.autoSHMchange = "y"
+            	if (location.currentState("alarmSystemStatus")?.value == "away"){
+			sendEvent(linkText:app.label, name:"Smart Home Monitor", value:"stay",descriptionText:"Smart Home Monitor was set to stay", eventType:"SOLUTION_EVENT", displayed: true)
+			log.trace "Smart Home Monitor was set to stay"
+			sendLocationEvent(name: "alarmSystemStatus", value: "stay")
+			state.autoSHMchange = "y"
                 }
             }
 		break;
@@ -176,7 +176,7 @@ def pollOn() {
 	}
 	settings.switch1.each() {
 		if (it.currentSwitch == "on") {
-        	state.pollState = now()
+			state.pollState = now()
 			it.poll()
 		}
 	}
@@ -199,7 +199,7 @@ def pollOff() {
 	}
 	settings.switch1.each() {
 		if (it.currentSwitch == "off") {
-        	state.pollState = now()
+			state.pollState = now()
 			it.poll()
 		}
 	}
@@ -214,7 +214,7 @@ def pollErr() {
 	}
 	settings.switch1.each() {
 		if (it.currentStatus == "error") {
-        	state.pollState = now()
+			state.pollState = now()
 			it.poll()
 		}
 	}
@@ -226,8 +226,8 @@ def pollErr() {
 def pollRestart(evt) {
 	def t = now() - state.pollState
 		if (t > (65 * 120000)) {
-        	unschedule(pollOff)
-        	schedule("22 4 0/1 1/1 * ? *", pollOff)
+			unschedule(pollOff)
+			schedule("22 4 0/1 1/1 * ? *", pollOff)
 			sendEvent(linkText:app.label, name:"Poll", value:"Restart",descriptionText:"Polling Restarted", eventType:"SOLUTION_EVENT", displayed: true)
 			log.trace "Polling Restarted"
         }
