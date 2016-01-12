@@ -19,6 +19,7 @@
  *	Version: 1.4 - Added bin full notifcations
  *	Version: 1.4.1 - Fixed SMS send issue
  *	Version: 1.4.2 - Fixed No such property: currentSwitch issue, added poll on initialize, locked to single instance
+ *	Version: 1.5 - More robust polling, auto set Smart Home Monitor
  */
  
 definition(
@@ -36,7 +37,7 @@ preferences {
 	page name:"pageInfo"
 }
 def pageInfo() {
-	return dynamicPage(name: "pageInfo", title: "Thinking Cleanerer", install: true, uninstall: true) {
+	return dynamicPage(name: "pageInfo", title: "Thinking Cleanerer", install: true, uninstall: true) {    
 	section("About") {
 		paragraph "Thinking Cleaner(Roomba) smartapp for Smartthings. This app monitors you roomba and provides job notifacation"
 		paragraph "${textVersion()}\n${textCopyright()}"    
@@ -57,11 +58,15 @@ def pageInfo() {
 			}
 		}
 		section("Select Roomba(s) to monitor..."){
-			input "switch1", "device.ThinkingCleaner", title: "Monitored Roomba", required: true, multiple: true, submitOnChange: true
+			input "switch1", "device.ThinkingCleaner", title: "Monitored Roomba", required: true, multiple: true, defaultValue: false, submitOnChange: true
+		}
+		section(hideable: true, hidden: true, "Auto Smart Home Monitor..."){
+			input "autoSHM", "bool", title: "Auto Set Smart Home Monitor?", required: true, multiple: true, defaultValue: false, submitOnChange: true
+			paragraph"Auto Set Smart Home Monitor to Arm(Stay) when cleaning and Arm(Away) when done."
 		}
 		section(hideable: true, hidden: true, "Event Notifications..."){
 			input "sendPush", "bool", title: "Send as Push?", required: false, defaultValue: true
-			input "sendSMS", "phone", title: "Send as SMS?", required: false
+			input "sendSMS", "phone", title: "Send as SMS?", required: false, defaultValue: null
 			input "sendRoombaOn", "bool", title: "Notify when on?", required: false, defaultValue: false
 			input "sendRoombaOff", "bool", title: "Notify when off?", required: false, defaultValue: false
 			input "sendRoombaError", "bool", title: "Notify on error?", required: false, defaultValue: true
@@ -88,8 +93,11 @@ def initialize() {
 	subscribe(switch1, "switch.off", eventHandler)
 	subscribe(switch1, "status.error", eventHandler)
 	subscribe(switch1, "bin.full", eventHandler)
-    pollOff
-    schedule("22 4 0/1 1/1 * ? *", pollOff)
+	subscribe(location, "sunset", pollRestart)
+	subscribe(location, "sunrise", pollRestart)
+	schedule("22 4 0/1 1/1 * ? *", pollOff)
+	pollOff
+    
 }
 
 def eventHandler(evt) {
@@ -113,7 +121,7 @@ def eventHandler(evt) {
 			sendEvent(linkText:app.label, name:"${evt.displayName}", value:"on",descriptionText:"${evt.displayName} is on", eventType:"SOLUTION_EVENT", displayed: true)
 			log.trace "${evt.displayName} is on"
 			msg = "${evt.displayName} is on"
-        	schedule("15 0/1 * 1/1 * ?", pollOn)
+			schedule("15 0/1 * 1/1 * ?", pollOn)
 			if (sendRoombaOn == true) {
 				if (settings.sendSMS != null) {
 					sendSms(sendSMS, msg) 
@@ -122,6 +130,14 @@ def eventHandler(evt) {
 					sendPush(msg)
 				}
 			}
+            if (settings.autoSHM.contains('true') ) {
+            	if (location.currentState("alarmSystemStatus")?.value == "away"){
+			sendEvent(linkText:app.label, name:"Smart Home Monitor", value:"stay",descriptionText:"Smart Home Monitor was set to stay", eventType:"SOLUTION_EVENT", displayed: true)
+			log.trace "Smart Home Monitor was set to stay"
+			sendLocationEvent(name: "alarmSystemStatus", value: "stay")
+			state.autoSHMchange = "y"
+                }
+            }
 		break;
 		case "full":
 			sendEvent(linkText:app.label, name:"${evt.displayName}", value:"bin full",descriptionText:"${evt.displayName} bin is full", eventType:"SOLUTION_EVENT", displayed: true)
@@ -160,11 +176,20 @@ def pollOn() {
 	}
 	settings.switch1.each() {
 		if (it.currentSwitch == "on") {
+			state.pollState = now()
 			it.poll()
 		}
 	}
 	if (onSwitch1.size() == 0) {
 		unschedule(pollOn)
+		if (settings.autoSHM.contains('true') ) {
+			if (location.currentState("alarmSystemStatus")?.value == "stay" && state.autoSHMchange == "y"){
+				sendEvent(linkText:app.label, name:"Smart Home Monitor", value:"away",descriptionText:"Smart Home Monitor was set back to away", eventType:"SOLUTION_EVENT", displayed: true)
+				log.trace "Smart Home Monitor was set back to away"
+				sendLocationEvent(name: "alarmSystemStatus", value: "away")
+				state.autoSHMchange = "n"
+			}
+		}
 	}
 }
 
@@ -174,6 +199,7 @@ def pollOff() {
 	}
 	settings.switch1.each() {
 		if (it.currentSwitch == "off") {
+			state.pollState = now()
 			it.poll()
 		}
 	}
@@ -188,6 +214,7 @@ def pollErr() {
 	}
 	settings.switch1.each() {
 		if (it.currentStatus == "error") {
+			state.pollState = now()
 			it.poll()
 		}
 	}
@@ -195,8 +222,19 @@ def pollErr() {
 		unschedule(pollErr)
 	}
 }
+
+def pollRestart(evt) {
+	def t = now() - state.pollState
+		if (t > (65 * 120000)) {
+			unschedule(pollOff)
+			schedule("22 4 0/1 1/1 * ? *", pollOff)
+			sendEvent(linkText:app.label, name:"Poll", value:"Restart",descriptionText:"Polling Restarted", eventType:"SOLUTION_EVENT", displayed: true)
+			log.trace "Polling Restarted"
+        }
+}
+
 private def textVersion() {
-    def text = "Version 1.4.2"
+    def text = "Version 1.5"
 }
 
 private def textCopyright() {
