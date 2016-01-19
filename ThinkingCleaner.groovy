@@ -49,7 +49,6 @@ metadata {
 	tiles {
 		valueTile("battery", "device.battery", width: 1, height: 1, inactiveLabel: false, canChangeIcon: false) {
 			state ("default", label:' \u0003\u0003\u0003\u0003\u0003 \u0003\u0003\u0003\u0003\u0003 ...${currentValue}% \u0003\u0003\u0003\u0003', icon:"st.samsung.da.RC_ic_charge", backgroundColors: [
-//			state ("default", label:'${currentValue}% Battery', icon:"", backgroundColors: [
 				[value: 20, color: "#bc2323"],
 				[value: 50, color: "#ffff00"],
 				[value: 96, color: "#79b821"]
@@ -197,6 +196,7 @@ def parse(String description) {
 	}
 	else {
 		sendEvent(name: 'status', value: "error" as String)
+		sendEvent(name: 'network', value: "Not Connected" as String)
 		log.debug headerString
 	}
 	parse
@@ -243,11 +243,11 @@ def poll() {
 	if (device.deviceNetworkId != null) {
 		api('refresh')
 	}
-    else {
+	else {
 		sendEvent(name: 'status', value: "error" as String)
 		sendEvent(name: 'network', value: "Not Connected" as String)
 		log.debug "DNI: Not set"
-    }
+	}
 }
 
 def refresh() {
@@ -265,13 +265,13 @@ def beep() {
 def api(String rooCommand, success = {}) {
 	def rooPath
 	def hubAction
-    if (device.currentValue('network') == "unknown"){
-    	sendEvent(name: 'network', value: "Not Connected" as String)
-        log.debug "Network is not connected"
-    }
-    else {
+	if (device.currentValue('network') == "unknown"){
+		sendEvent(name: 'network', value: "Not Connected" as String)
+		log.debug "Network is not connected"
+	}
+	else {
 		sendEvent(name: 'network', value: "unknown" as String, displayed:false)
-    }
+	}
 	switch (rooCommand) {
 		case "on":
 			rooPath = "/command.json?command=clean"
@@ -326,14 +326,14 @@ def api(String rooCommand, success = {}) {
 
 def ipSetup() {
 	def hosthex
-    def porthex
+	def porthex
 	if (settings.ip) {
 		hosthex = convertIPtoHex(settings.ip)
 	}
-    if (settings.port) {
+	if (settings.port) {
 		porthex = convertPortToHex(settings.port)
-    }
-    if (settings.ip && settings.port) {
+	}
+	if (settings.ip && settings.port) {
 		device.deviceNetworkId = "$hosthex:$porthex"
 	}
 }
@@ -351,9 +351,9 @@ private delayAction(long time) {
 }
 
 private def textVersion() {
-    def text = "Version 1.4.2"
+	def text = "Version 1.4.2"
 }
 
 private def textCopyright() {
-    def text = "Copyright © 2015 Sidjohn1"
+	def text = "Copyright © 2015 Sidjohn1"
 }
