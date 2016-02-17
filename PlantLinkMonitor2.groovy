@@ -16,6 +16,7 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *	Version: 2.0 - Initial Version
+ *	Version: 2.1 - Better grammer and plant status detection
  */
 definition(
     name: "PlantLink Monitor 2",
@@ -41,9 +42,16 @@ def pageInfo() {
 		paragraph "${textVersion()}\n${textCopyright()}"
 		}
 		def plantlist = ""
+        def verb = ""
 			settings.senors.each() {
 			try {
-				plantlist += "$it.displayName is $it.currentPlantStatus\n"
+				if (it.currentPlantStatus.contains("Needs")) {
+					verb = " "
+				}
+				else {
+					verb = " is "
+				}
+				plantlist += "$it.displayName$verb${it.currentPlantStatus.toLowerCase()}\n"
 			} catch (e) {
                 log.trace "Error checking status."
                 log.trace e
@@ -61,7 +69,7 @@ def pageInfo() {
 			input "sendPush", "bool", title: "Send as Push?", required: false, defaultValue: true
 			input "sendSMS", "phone", title: "Send as SMS?", required: false, defaultValue: null
 			input "sendTooDry", "bool", title: "Notify when too dry?", required: false, defaultValue: true
-      input "sendTooWet", "bool", title: "Notify when too wet?", required: false, defaultValue: false
+            input "sendTooWet", "bool", title: "Notify when too wet?", required: false, defaultValue: false
 		}
 	}
 }
@@ -73,29 +81,43 @@ def installed() {
 
 def updated() {
 	log.trace "Updated with settings: ${settings}"
+    unschedule()
 	unsubscribe()
 	initialize()
 }
 
 def initialize() {
 	log.info "PlantLink-Direct Monitor ${textVersion()} ${textCopyright()}"
+    subscribe(app, onAppTouch)
 	subscribe(location, "sunset", updated)
 	subscribe(location, "sunrise", updated)
 	schedule("22 32 6,19 1/1 * ?", sendStatus)
 }
 
+def onAppTouch(event) {
+    log.info "onAppTouch(${event.value})"
+    sendStatus()
+}
+
 def sendStatus() {
 	log.trace "Checking Plants"
+    def verb = ""
 	sendEvent(linkText:app.label, name:"sendStatus", value:"Checking Plants", descriptionText:"Checking Plants", eventType:"SOLUTION_EVENT", displayed: true)
 	settings.senors.each() {
 		try {
-			log.trace "${it.displayName} is ${it.currentStatus}"
-			sendEvent(linkText:app.label, name:"${it.displayName}", value:"${it.currentStatus}", descriptionText:"${it.displayName} is ${it.currentStatus}", eventType:"SOLUTION_EVENT", displayed: true)
-			if (it.currentStatus == "Too Wet" && settings.sendTooWet == true) {
-				send("${it.displayName} is ${it.currentStatus}")
+			if (it.currentPlantStatus.contains("Needs")) {
+				verb = " "
 			}
-			if (it.currentStatus == "Too Dry" && settings.sendTooDry == true) {
-				send("${it.displayName} is ${it.currentStatus}")
+			else {
+				verb = " is "
+			}
+			log.trace "${it.displayName}$verb${it.currentPlantStatus.toLowerCase()}"
+			sendEvent(linkText:app.label, name:"${it.displayName}", value:"${it.currentPlantStatus}", descriptionText:"${it.displayName}$verb${it.currentPlantStatus.toLowerCase()}", eventType:"SOLUTION_EVENT", displayed: true)
+			if (it.currentPlantStatus == "Too Wet" && settings.sendTooWet == true) {
+				send("${it.displayName}$verb${it.currentPlantStatus.toLowerCase()}")
+			}
+			if ((it.currentPlantStatus == "Too Dry" || it.currentPlantStatus == "Needs Water") && settings.sendTooDry == true) {
+				send("${it.displayName}$verb${it.currentPlantStatus.toLowerCase()}")
 			}
 		}
 		catch (e) {
@@ -115,9 +137,9 @@ def send(msg) {
 }
 
 private def textVersion() {
-    def text = "Version 2.0"
+    def text = "Version 2.1"
 }
 
 private def textCopyright() {
-    def text = "Copyright © 2015 Sidjohn1"
+    def text = "Copyright © 2016 Sidjohn1"
 }
