@@ -16,7 +16,7 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *	Version: 2.0 - Initial Version
- *	Version: 2.1 - Better grammer and plant status detection
+ *	Version: 2.1 - Better grammar and plant status detection
  */
 definition(
     name: "PlantLink Monitor 2",
