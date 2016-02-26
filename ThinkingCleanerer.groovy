@@ -20,6 +20,7 @@
  *	Version: 1.4.1 - Fixed SMS send issue
  *	Version: 1.4.2 - Fixed No such property: currentSwitch issue, added poll on initialize, locked to single instance
  *	Version: 1.5 - More robust polling, auto set Smart Home Monitor
+ *	Version: 1.5.1 - Even more robust polling
  */
  
 definition(
@@ -178,6 +179,7 @@ def pollOn() {
 		if (it.currentSwitch == "on") {
 			state.pollState = now()
 			it.poll()
+			runIn(80, pollRestartOn, [overwrite: true])
 		}
 	}
 	if (onSwitch1.size() == 0) {
@@ -201,6 +203,7 @@ def pollOff() {
 		if (it.currentSwitch == "off") {
 			state.pollState = now()
 			it.poll()
+            runIn(3660, pollRestart, [overwrite: true])
 		}
 	}
 	if (offSwitch1.size() == 0) {
@@ -222,19 +225,28 @@ def pollErr() {
 		unschedule(pollErr)
 	}
 }
+def pollRestartOn() {
+	def t = now() - state.pollState
+		if (t > 660000) {
+			unschedule(pollOn)
+			schedule("16 0/1 * 1/1 * ?", pollOn)
+			sendEvent(linkText:app.label, name:"Poll", value:"Restart",descriptionText:"Polling Restarted", eventType:"SOLUTION_EVENT", displayed: true)
+			log.trace "Polling Restarted"
+        }
+}
 
 def pollRestart(evt) {
 	def t = now() - state.pollState
-		if (t > (65 * 120000)) {
+		if (t > 4200000) {
 			unschedule(pollOff)
-			schedule("22 4 0/1 1/1 * ? *", pollOff)
+			schedule("23 4 0/1 1/1 * ? *", pollOff)
 			sendEvent(linkText:app.label, name:"Poll", value:"Restart",descriptionText:"Polling Restarted", eventType:"SOLUTION_EVENT", displayed: true)
 			log.trace "Polling Restarted"
         }
 }
 
 private def textVersion() {
-    def text = "Version 1.5"
+    def text = "Version 1.5.1"
 }
 
 private def textCopyright() {
