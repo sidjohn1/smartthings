@@ -15,7 +15,9 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *	Version: 1.0 - Initial Version
- *  Version: 1.1 - Update to add thermostat mode trigger, contributed by David Smith - github: gunkl
+ *  Version: 1.1 - Update by David Smith - github: gunkl - Added ability to control a thermostat as well as switch.
+ *  Version: 1.11 - Update by David Smith - github: gunkl - Change scheduled updates to be every other hour at 5mins after the hour.  
+ *                - New setting to NOT set thermostat if it is currently OFF. Avoids collisions with other apps, like those that turn it off when the door closes.
  *
  */
 definition(
@@ -71,7 +73,12 @@ def pageInfo() {
 		section("Then set the thermostat mode...") {
             input name: "thermostat", type: "capability.thermostat", title: "thermostat", required: false, multiple: true, defaultValue: empty
             input name: "thermostatmode", type: "enum", title: "Mode?", metadata: [values:["auto", "heat", "cool", "off"]]
-    
+    		if (dontsettstatalways != true) {
+				input name: "dontsettstatalways", type: "bool", title: "Set thermostat always", required: false, multiple:false, defaultValue: false, submitOnChange: true
+			}
+			else {
+				input name: "dontsettstatalways", type: "bool", title: "Do not set thermostat if mode is OFF", required: false, multiple:false, defaultValue: false, submitOnChange: true
+			}
 		}
 		section([title:"Options", mobileOnly:true]) {
 			label(title:"Assign a name", required: false, defaultValue: "Forecast High/Low Trigger")
@@ -93,9 +100,12 @@ def updated() {
 }
 
 def initialize() {
-	log.info "PlantLink-Direct Monitor ${textVersion()} ${textCopyright()}"
+	state.thermostatMode = thermostat.currentValue("thermostatMode")	
+    log.info "Forecast Trigger ${textVersion()} ${textCopyright()}"
+    log.info "Thermostat is currently set to: ${state.thermostatMode}"
 	dailyForecast
-	schedule("25 00 00,12, 1/1 * ?", dailyForecast)
+    // update forecast every hour at 5 minutes after the hour.
+	schedule("0 5 0/2 * * ?", dailyForecast)
     if (settings.switch1Schedule) {
 		schedule(settings.switch1Schedule, scheduledRun)
     }
@@ -130,6 +140,8 @@ def dailyForecast() {
 def scheduledRun() {
 	def delay
 	def forecastDay
+    state.thermostatMode = thermostat.currentValue("thermostatMode")
+    
 	if (settings.switch1Timmer != null || 0) {
 		delay = switch1Timmer * 60
 	}
@@ -142,13 +154,14 @@ def scheduledRun() {
 	}
     
     if (settings.thermostat) {
-        // aboveBelow false means temp above or equal
-        if ((settings.aboveBelow == false) && (forecastDay >= settings.setTemp)) {
-        	thermostat."${thermostatmode}"()
+        log.debug "Dont set always: $dontsettstatalways - Thermostat mode: $state.thermostatMode"
+    	if ((dontsettstatalways == true) && (state.thermostatMode != ["off"])) {
+        	// if thermostat is off and setting is true then dont set thermostat mode
+		    setThermostatMode()
         }
-        // aboveBelow true means temp below or equal
-        if ((settings.aboveBelow == true) && (forecastDay <= settings.setTemp)) {
-        	thermostat."${thermostatmode}"()
+        if (dontsettstatalways == false) {
+        	// if setting is false, then always set thermostat mode
+        	setThermostatMode()
         }
     }
 
@@ -197,10 +210,20 @@ def turnOn() {
 }
 
 private def textVersion() {
-    def text = "Version 1.1"
+    def text = "Version 1.11"
 }
 
 private def textCopyright() {
     def text = "Copyright © 2015-2017 Sidjohn1"
 }
 
+private def setThermostatMode() {
+        // aboveBelow false means temp above or equal
+        if ((settings.aboveBelow == false) && (forecastDay >= settings.setTemp)) {
+        	thermostat."${settings.thermostatmode}"()
+        }
+        // aboveBelow true means temp below or equal
+        if ((settings.aboveBelow == true) && (forecastDay <= settings.setTemp)) {
+        	thermostat."${settings.thermostatmode}"()
+        }
+}
