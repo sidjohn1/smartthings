@@ -18,12 +18,11 @@
  *	Version: 1.0 - Initial Version
  *
  */
-import groovy.json.JsonSlurper
 preferences {
-		input("deviceIp", "text", title: "IP Address", description: "Device IP Address", required: true, displayDuringSetup: true)
-		input("devicePort", "number", title: "Port Number", description: "Device Port Number (Default:80)", defaultValue: "80", required: true, displayDuringSetup: true)
-		input("deviceOnPath", "text", title: "On Path (/blah?q=this)", required: false)
-		input("deviceOffPath", "text", title: "Off Path (/blah?q=this)", required: false)
+	input("deviceIp", "text", title: "IP Address", description: "Device IP Address", required: true, displayDuringSetup: true)
+	input("devicePort", "number", title: "Port Number", description: "Device Port Number (Default:80)", defaultValue: "80", required: true, displayDuringSetup: true)
+	input("deviceOnPath", "text", title: "On Path (/blah?q=this)", required: false)
+	input("deviceOffPath", "text", title: "Off Path (/blah?q=this)", required: false)
         input("deviceDimPath", "text", title: "Dim Path (/blah?q=this)", required: false)
         input("deviceStatusPath", "text", title: "Status Path (/blah?q=this)", required: false)
 }
@@ -38,13 +37,9 @@ metadata {
 	capability "Health Check"
 	}
 
-	// simulator metadata
-	simulator {
-	}
-
 	// UI tile definitions
     
-    tiles(scale: 2) {
+	tiles(scale: 2) {
 		multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4, canChangeIcon: true){
 			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
 				attributeState "on", label:'${name}', action:"switch.off", icon:"st.switches.switch.on", backgroundColor:"#00A0DC", nextState:"off"
