@@ -30,12 +30,12 @@ preferences {
 
 metadata {
 	definition (name: "URI Dimmer", namespace: "sidjohn1", author: "sidjohn1") {
-		capability "Actuator"
-		capability "Switch"
+	capability "Actuator"
+	capability "Switch"
         capability "Switch Level"
-		capability "Sensor"
+	capability "Sensor"
         capability "Refresh"
-		capability "Health Check"
+	capability "Health Check"
 	}
 
 	// simulator metadata
@@ -75,11 +75,11 @@ def parse(String description) {
 	def map
 	def headerString
     
-    map = stringToMap(description)
+    	map = stringToMap(description)
 	headerString = new String(map.headers.decodeBase64())
 	if (headerString.contains("200 OK")) {
 		createEvent(name: "${state.saveEvent[0]}", value: "${state.saveEvent[1]}", displayed: true)
-        log.debug "${state.saveEvent[0]} ${state.saveEvent[1]}"
+		log.debug "${state.saveEvent[0]} ${state.saveEvent[1]}"
 	}
 }
 
@@ -122,33 +122,35 @@ def sendCommand(command) {
 	if (isLocal(settings.deviceIp)==false){
 		def cmd = "${settings.external_off_uri}";
 		log.debug "Sending request cmd[${cmd}]"
-			httpGet(cmd) {resp ->
-				if (resp.data) {
-					log.info "${resp.data}"
-				} 
-			}
+		httpGet(cmd) {resp ->
+			if (resp.data) {
+				log.info "${resp.data}"
+			} 
+		}
 	}
 	if (isLocal(settings.deviceIp)==true){
 	def hubAction
-    def sendPath
+	def sendPath
 	switch (command) {
 		case "on":
         	sendPath = "${deviceOnPath}"
-            state.saveEvent = ["switch","on"]
-			log.debug "Executing On" 
+		state.saveEvent = ["switch","on"]
+		log.debug "Executing On" 
 		break;
+		
 		case "off":
         	sendPath = "${deviceOffPath}"
-            state.saveEvent = ["switch","off"]
-			log.debug "Executing Off" 
-			
+		state.saveEvent = ["switch","off"]
+		log.debug "Executing Off" 
 		break;
+		
 		case "refresh":
         	sendPath = "${deviceStatusPath}"
 		break;
+		
 		default:
         	sendPath = "${deviceDimPath}${command}"
-            state.saveEvent = ["level","${command}"]
+		state.saveEvent = ["level","${command}"]
 		break;
 	}
 	try {
@@ -161,7 +163,7 @@ def sendCommand(command) {
 	catch (Exception e) {
 		log.debug "Hit Exception $e on $hubAction"
 	}
-    log.debug "${command}"
+	log.debug "${command}"
 	return hubAction
 	}
 }
@@ -169,12 +171,12 @@ def sendCommand(command) {
 private def isLocal(ip) {
 	String hubNetwork = "${location.hubs.localIP}".tokenize( '.' )[0,1].join().replace("[","")
 	String deviceNetwork = ip.tokenize( '.' )[0,1].join().replace("[","")
-    if (hubNetwork == deviceNetwork){
-	    return true
-    }
-    else{
-	    return false
-    }
+	if (hubNetwork == deviceNetwork){
+		return true
+	}
+	else{
+		return false
+	}
 }
 
 def ipSetup() {
@@ -188,11 +190,11 @@ def ipSetup() {
 	}
 	if (settings.deviceIp && settings.devicePort) {
 		device.deviceNetworkId = "$hosthex:$porthex"
-        log.info "Setting up Network ID $hosthex:$porthex"
+		log.info "Setting up Network ID $hosthex:$porthex"
 	}
-    else {
-    	log.debug "Error Setting up Network ID"
-    }
+	else {
+		log.debug "Error Setting up Network ID"
+	}
 }
 
 private String convertIPtoHex(ip) { 
