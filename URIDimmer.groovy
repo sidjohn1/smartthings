@@ -16,6 +16,7 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *	Version: 1.0 - Initial Version
+ *	Version: 1.1 - Added device health check
  *
  */
 preferences {
@@ -23,17 +24,17 @@ preferences {
 	input("devicePort", "number", title: "Port Number", description: "Device Port Number (Default:80)", defaultValue: "80", required: true, displayDuringSetup: true)
 	input("deviceOnPath", "text", title: "On Path (/blah?q=this)", required: false)
 	input("deviceOffPath", "text", title: "Off Path (/blah?q=this)", required: false)
-        input("deviceDimPath", "text", title: "Dim Path (/blah?q=this)", required: false)
-        input("deviceStatusPath", "text", title: "Status Path (/blah?q=this)", required: false)
+	input("deviceDimPath", "text", title: "Dim Path (/blah?q=this)", required: false)
+	input("deviceStatusPath", "text", title: "Status Path (/blah?q=this)", required: false)
 }
 
 metadata {
 	definition (name: "URI Dimmer", namespace: "sidjohn1", author: "sidjohn1") {
 	capability "Actuator"
 	capability "Switch"
-        capability "Switch Level"
+	capability "Switch Level"
 	capability "Sensor"
-        capability "Refresh"
+	capability "Refresh"
 	capability "Health Check"
 	}
 
@@ -70,11 +71,13 @@ def parse(String description) {
 	def map
 	def headerString
     
-    	map = stringToMap(description)
+    map = stringToMap(description)
 	headerString = new String(map.headers.decodeBase64())
 	if (headerString.contains("200 OK")) {
-		createEvent(name: "${state.saveEvent[0]}", value: "${state.saveEvent[1]}", displayed: true)
+		sendEvent(name: "${state.saveEvent[0]}", value: "${state.saveEvent[1]}", displayed: true)
+		sendEvent(name: "status", value: "online", displayed: true)
 		log.debug "${state.saveEvent[0]} ${state.saveEvent[1]}"
+		state.statusCount = 0
 	}
 }
 
@@ -90,7 +93,9 @@ def updated() {
 
 def initialize() {
 	log.info "URI Dimmer ${textVersion()} ${textCopyright()}"
-    ipSetup()
+	ipSetup()
+	state.statusCount = 0
+	sendEvent(name: "checkInterval", value: 13 * 60, data: [protocol: "lan", hubHardwareId: device.hub.hardwareID], displayed: false)
 }
 
 def on() {
@@ -128,13 +133,13 @@ def sendCommand(command) {
 	def sendPath
 	switch (command) {
 		case "on":
-        	sendPath = "${deviceOnPath}"
+		sendPath = "${deviceOnPath}"
 		state.saveEvent = ["switch","on"]
 		log.debug "Executing On" 
 		break;
 		
 		case "off":
-        	sendPath = "${deviceOffPath}"
+		sendPath = "${deviceOffPath}"
 		state.saveEvent = ["switch","off"]
 		log.debug "Executing Off" 
 		break;
@@ -144,9 +149,13 @@ def sendCommand(command) {
 		break;
 		
 		default:
-        	sendPath = "${deviceDimPath}${command}"
+		sendPath = "${deviceDimPath}${command}"
 		state.saveEvent = ["level","${command}"]
 		break;
+	}
+	state.statusCount = state.statusCount + 1
+	if (state.statusCount > 1) {
+		sendEvent(name: "status", value: "offline", displayed: true)
 	}
 	try {
 		hubAction = [new physicalgraph.device.HubAction(
@@ -158,7 +167,7 @@ def sendCommand(command) {
 	catch (Exception e) {
 		log.debug "Hit Exception $e on $hubAction"
 	}
-	log.debug "${command}"
+//	log.debug "${command}"
 	return hubAction
 	}
 }
@@ -201,7 +210,7 @@ private String convertPortToHex(port) {
 	return hexport
 }
 private String textVersion() {
-	def text = "Version 1.0"
+	def text = "Version 1.1"
 }
 
 private String textCopyright() {
