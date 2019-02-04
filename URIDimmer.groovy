@@ -17,6 +17,7 @@
  *
  *	Version: 1.0 - Initial Version
  *	Version: 1.1 - Added device health check
+ *	Version: 1.2 - Added support for samsung connect
  *
  */
 preferences {
@@ -29,11 +30,11 @@ preferences {
 }
 
 metadata {
-	definition (name: "URI Dimmer", namespace: "sidjohn1", author: "sidjohn1") {
+	definition (name: "URI Dimmer Switch", namespace: "sidjohn1", author: "sidjohn1", ocfDeviceType: "oic.d.switch", vid: "generic-dimmer") {
 	capability "Actuator"
 	capability "Switch"
 	capability "Switch Level"
-	capability "Sensor"
+    capability "Sensor"
 	capability "Refresh"
 	capability "Health Check"
 	}
@@ -75,7 +76,8 @@ def parse(String description) {
 	headerString = new String(map.headers.decodeBase64())
 	if (headerString.contains("200 OK")) {
 		sendEvent(name: "${state.saveEvent[0]}", value: "${state.saveEvent[1]}", displayed: true)
-		sendEvent(name: "status", value: "online", displayed: true)
+		sendEvent(name: "status", value: "online", displayed: true, isStateChange: true)
+        sendEvent(name: "DeviceWatch-DeviceStatus", value: "online", displayed: false, isStateChange: true)
 		log.debug "${state.saveEvent[0]} ${state.saveEvent[1]}"
 		state.statusCount = 0
 	}
@@ -95,7 +97,17 @@ def initialize() {
 	log.info "URI Dimmer ${textVersion()} ${textCopyright()}"
 	ipSetup()
 	state.statusCount = 0
-	sendEvent(name: "checkInterval", value: 13 * 60, data: [protocol: "lan", hubHardwareId: device.hub.hardwareID], displayed: false)
+    sendEvent(name: "DeviceWatch-Enroll", value: "{\"protocol\": \"LAN\", \"scheme\":\"untracked\", \"hubHardwareId\": \"${device.hub.hardwareID}\"}", displayed: false)
+	sendEvent(name: "checkInterval", value: 32 * 60, data: [protocol: "lan", hubHardwareId: device.hub.hardwareID], displayed: false)
+    autoPoll()
+}
+
+def autoPoll() {
+	unschedule()
+//	def sec = Math.round(Math.floor(Math.random() * 60))
+//	def cron = "$sec 0/8 * * * ?" // every 8 min
+//	schedule(cron, ping)
+	runEvery15Minutes(ping)
 }
 
 def on() {
@@ -153,9 +165,10 @@ def sendCommand(command) {
 		state.saveEvent = ["level","${command}"]
 		break;
 	}
-	state.statusCount = state.statusCount + 1
-	if (state.statusCount > 1) {
-		sendEvent(name: "status", value: "offline", displayed: true)
+	state.statusCount = state.statusCount++
+	if (state.statusCount >= 3) {
+		sendEvent(name: "status", value: "offline", displayed: true, isStateChange: true)
+        sendEvent(name: "DeviceWatch-DeviceStatus", value: "offline", displayed: false, isStateChange: true)
 	}
 	try {
 		hubAction = [new physicalgraph.device.HubAction(
@@ -210,7 +223,7 @@ private String convertPortToHex(port) {
 	return hexport
 }
 private String textVersion() {
-	def text = "Version 1.1"
+	def text = "Version 1.2"
 }
 
 private String textCopyright() {
