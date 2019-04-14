@@ -18,6 +18,7 @@
  *	Version: 1.0 - Initial Version
  *	Version: 1.1 - Added device health check
  *	Version: 1.2 - Added support for samsung connect
+ *	Version: 1.3 - Added Dimmer Multiplyer
  *
  */
 preferences {
@@ -27,6 +28,7 @@ preferences {
 	input("deviceOffPath", "text", title: "Off Path (/blah?q=this)", required: false)
 	input("deviceDimPath", "text", title: "Dim Path (/blah?q=this)", required: false)
 	input("deviceStatusPath", "text", title: "Status Path (/blah?q=this)", required: false)
+    input("deviceMuliplier", "decimal", title: "Dimming Multiplier", description: "Dimming Multiplier (Default:1, Fully:2.55)", defaultValue: "1", required: true, displayDuringSetup: true)
 }
 
 metadata {
@@ -98,15 +100,15 @@ def initialize() {
 	ipSetup()
 	state.statusCount = 0
     sendEvent(name: "DeviceWatch-Enroll", value: "{\"protocol\": \"LAN\", \"scheme\":\"untracked\", \"hubHardwareId\": \"${device.hub.hardwareID}\"}", displayed: false)
-	sendEvent(name: "checkInterval", value: 32 * 60, data: [protocol: "lan", hubHardwareId: device.hub.hardwareID], displayed: false)
+	sendEvent(name: "checkInterval", value: 14 * 60, data: [protocol: "lan", hubHardwareId: device.hub.hardwareID], displayed: false)
     autoPoll()
 }
 
 def autoPoll() {
 	unschedule()
-//	def sec = Math.round(Math.floor(Math.random() * 60))
-//	def cron = "$sec 0/8 * * * ?" // every 8 min
-//	schedule(cron, ping)
+	def sec = Math.round(Math.floor(Math.random() * 60))
+	def cron = "$sec 0/8 * * * ?" // every 8 min
+	schedule(cron, ping)
 	runEvery15Minutes(ping)
 }
 
@@ -161,7 +163,7 @@ def sendCommand(command) {
 		break;
 		
 		default:
-		sendPath = "${deviceDimPath}${command}"
+		sendPath = "${deviceDimPath}${command.toInteger()*2.55.toInteger()}"
 		state.saveEvent = ["level","${command}"]
 		break;
 	}
@@ -180,7 +182,7 @@ def sendCommand(command) {
 	catch (Exception e) {
 		log.debug "Hit Exception $e on $hubAction"
 	}
-//	log.debug "${command}"
+//	log.debug "$hubAction"
 	return hubAction
 	}
 }
@@ -223,9 +225,9 @@ private String convertPortToHex(port) {
 	return hexport
 }
 private String textVersion() {
-	def text = "Version 1.2"
+	def text = "Version 1.3"
 }
 
 private String textCopyright() {
-	def text = "Copyright © 2018 Sidjohn1"
+	def text = "Copyright © 2019 Sidjohn1"
 }
