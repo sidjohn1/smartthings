@@ -24,6 +24,7 @@
  *	Version: 2.2.1 - Added better browser support
  *	Version: 2.3 - Upgraded Icons
  *	Version: 2.4 - TWC Weather Update
+ *	Version: 2.5 - Added Rain Switch
  *
  */
 definition(
@@ -53,6 +54,8 @@ def selectDevices() {
             input "outsideTemp", "capability.temperatureMeasurement", title: "Outside Tempature...", multiple: false, required: false
 			input "showForcast", "bool", title:"Show Forcast", required: false, multiple:false
             input "stationID", "text", title:"Station ID (Optional)", required: false, multiple:false
+            input "rainswitch", "capability.switch", title:"Rain Switch (Optional)", required: false, multiple:false
+
 		}
 		section(hideable: true, hidden: true, "Optional Settings") {
         	input "fontColor", "bool", title: "Font Color Black", required: false
@@ -390,6 +393,24 @@ else {
 	forecast = getTwcForecast()
 	current = getTwcConditions()
 }
+
+if (settings.rainswitch) {
+	if (current.wxPhraseLong.contains("Rain") || current.wxPhraseLong.contains("Shower") || current.wxPhraseLong.contains("storm") || current.wxPhraseLong.contains("Snow")) {
+    	if (settings.rainswitch.currentSwitch == "off") {
+        	settings.rainswitch.on()
+        }
+		log.debug "rain"
+	    log.debug current.wxPhraseLong
+	}
+	else{
+        if (settings.rainswitch.currentSwitch == "on") {
+        	settings.rainswitch.off()
+        }
+		log.debug "no rain"
+	    log.debug current.wxPhraseLong
+	}
+}
+
 if (temperatureScale == "F") {
 	currentTemp = current.temperature ?: "??"
 	forecastDayHigh = forecast.temperatureMax[0] ?: current.temperatureMaxSince7Am
@@ -424,10 +445,10 @@ else {
 }
 
 def forecastNow = weatherIcons[current.iconCode.toString()]
-def forecastDayIcon = weatherIcons[forecast.daypart[0].iconCode[1].toString()]
-def forecastDay1Icon = weatherIcons[forecast.daypart[0].iconCode[3].toString()]
+def forecastDayIcon = weatherIcons[forecast.daypart[0].iconCode[0].toString()] ?: weatherIcons[forecast.daypart[0].iconCode[1].toString()]
+def forecastDay1Icon = weatherIcons[forecast.daypart[0].iconCode[2].toString()]
 def forecastDay2Icon = weatherIcons[forecast.daypart[0].iconCode[4].toString()]
-def forecastDay3Icon = weatherIcons[forecast.daypart[0].iconCode[7].toString()]
+def forecastDay3Icon = weatherIcons[forecast.daypart[0].iconCode[6].toString()]
 
 def dop = new java.text.SimpleDateFormat("E' - 'dd")
 def dip = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
@@ -436,7 +457,7 @@ def forcastDate1 = dip.parse(forecast.validTimeLocal[1])
 def forcastDate2 = dip.parse(forecast.validTimeLocal[2])
 def forcastDate3 = dip.parse(forecast.validTimeLocal[3])
 
-"""{"data": [{"icon":"${forecastNow}","cond":"${current.wxPhraseLong}","temp1":"${Math.round(insideTemp.currentValue("temperature"))}","temp2":"${Math.round(outsideTemp.currentValue("temperature"))}"
+"""{"data": [{"icon":"${forecastNow}","cond":"${current.wxPhraseLong}","temp1":"${Math.round(insideTemp.currentValue("temperature"))}","temp2":"${Math.round(currentTemp)}"
 ,"forecastDay":"${dop.format(forcastDate)}","forecastIcon":"${forecastDayIcon}","forecastDayHigh":"${forecastDayHigh}","forecastDayLow":"${forecastDayLow}"
 ,"forecastDay1":"${dop.format(forcastDate1)}","forecastIcon1":"${forecastDay1Icon}","forecastDayHigh1":"${forecastDayHigh1}","forecastDayLow1":"${forecastDayLow1}"
 ,"forecastDay2":"${dop.format(forcastDate2)}","forecastIcon2":"${forecastDay2Icon}","forecastDayHigh2":"${forecastDayHigh2}","forecastDayLow2":"${forecastDayLow2}"
@@ -462,5 +483,5 @@ private def textVersion() {
 }
 
 private def textCopyright() {
-    def text = "Copyright © 2016 Sidjohn1"
+    def text = "Copyright © 2020 Sidjohn1"
 }
