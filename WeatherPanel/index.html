@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+<html>
+<head><!-- Meta Data -->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="Description" content="Weather Panel" />
+	<meta name="application-name" content="Weather Panel" />
+	<meta name="apple-mobile-web-app-title" content="Weather Panel">
+	<meta name="keywords" content="weather,panel,smartthings" />
+	<meta name="Author" content="sidjohn1" />
+<!-- Apple Web App -->
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+	<link rel="apple-touch-icon-precomposed" href="./index.png" />
+	<link rel="icon" type="image/png" href="./index.png" />
+<!-- Stylesheets -->
+<style type="text/css">
+body{
+	background-size: cover;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-attachment: fixed;
+	background-color: rgb(0,0,0);
+	background-position: absolute;
+    background-repeat: no-repeat;
+	overflow: hidden;
+	margin: 0 0;
+	width: 100%;
+	height: 100%;
+}
+b{
+	font-size: 20px;
+	font-size: 10vh;
+	vertical-align: super;
+}
+p{
+	font-family:Gotham, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	color: rgb(255, 248, 220);
+	text-shadow: 2px 2px 1px rgb(222, 184, 135);
+	margin:0 0;
+	opacity: 0.9;
+}
+i{
+	color: rgb(255, 248, 220);
+	text-shadow: 2px 2px 1px rgb(222, 184, 135);
+	vertical-align: middle;
+	opacity: 0.9;
+}
+div{
+	background: transparent;
+}
+u{
+	text-decoration: overline;
+}
+.text1 {
+	font-weight: bold;
+	vertical-align: text-top;
+	margin-top: -3%;
+}
+.text2 {
+	font-weight: 900;
+    letter-spacing: 5px;
+	vertical-align: super;
+	margin-top: -3%;
+	margin-bottom: 1%;
+}
+.text3 {
+	font-weight: bold;
+	vertical-align: super;
+}
+#data {
+	display: flex;
+	display: -webkit-flex;
+	flex-direction: row;
+	-webkit-flex-direction: row;
+	flex-wrap: wrap;
+	-webkit-flex-wrap: wrap;
+}
+#icon{
+	margin: 3% 0 0 1%;
+	font-size: 20px;
+	font-size: 48vh;
+	text-align: center;
+	width: 47%;
+}
+#temp1{
+	text-align: right;
+	float: left;
+	width: 48%;
+	margin-left: 2%;
+	font-size: 20px;
+	font-size: 18vh;
+	line-height: 13vh;
+}
+#temp2{
+	text-align: right;
+	float: right;
+	width: 48%;
+	margin-right: 2%;
+	font-size: 20px;
+	font-size: 18vh;
+	line-height: 13vh;
+}
+#cond{
+	white-space: nowrap;
+	text-align: right;
+	width: 100%;
+	font-size: 20px;
+	font-size: 10vh;
+}
+#forecast{
+	white-space: nowrap;
+	text-align: right;
+	width: 20%;
+	font-size: 20px;
+	font-size: 7vh;
+	background: rgba(0,0,0,.5);
+	vertical-align: middle;
+	padding-right: 5%;
+}
+</style>
+<link type="text/css" rel="stylesheet" href="./index.css"/>
+<link rel="shortcut icon" type="image/png" href="./index.png"/>
+<link rel="manifest" href="./manifest.json">
+    <!-- Page Title -->
+    <title>Weather</title>
+  	<!-- Javascript -->
+<script type="text/javascript" charset="utf-8" src="./index.js"></script>
+<script type="text/javascript">
+$(window).load(function(){
+	var bg = '';
+	var tImage = new Image();
+	$("#data").click(function(){
+		var path = "../../Pictures/";
+		var fileList = "index.json";
+		$.getJSON(path+fileList,function(list,status){
+			var mime = '*';
+			while (mime.search('image')){
+				obj = list[Math.floor(Math.random()*list.length)];
+				mime=obj.mime;
+			}
+			bg = path+obj.path;
+			bg = bg.replace('#','%23');
+			$('<img src="'+bg+'"/>');
+            setTimeout(function(){
+				document.body.background = bg;
+			},3109);
+		});
+		var c = setTimeout('$("#data").click()', Math.floor(Math.random() * (1000000 - 800000 + 1) ) + 800000);
+	});
+	$("#data").click();
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	weatherData = function () {
+		$.getJSON("http://192.168.192.76/apps/api/659/json?access_token=b93882de-3c12-4323-986b-529989fd25dc",function(weather){
+		var content = '';
+			$.each(weather.data, function(i,item){
+	    		content += '<div id="icon"><i class="wi wi-' + item.icon + '"></i></div>';
+	    		content += '<div id="temp1" class="text3"><p>' + item.temp1 + '°<b>F&nbsp;<br>Inside&nbsp;</b><br>' + item.temp2 + '°<b>F&nbsp;<br>Outside&nbsp;</b><br></p></div>';
+    			content += '<div id="cond" class="text2"><p>' + item.cond + '&nbsp;</p></div>';
+    			content += '<div id="forecast" class="text3"><p>' + item.forecastDay + '<br><i class="wi wi-' + item.forecastIcon + '"></i>&nbsp;&nbsp;' + item.forecastDayHigh + '<br><u>' + item.forecastDayLow + '</u></p><br></div>';
+    			content += '<div id="forecast" class="text3"><p>' + item.forecastDay1 + '<br><i class="wi wi-' + item.forecastIcon1 + '"></i>&nbsp;&nbsp;' + item.forecastDayHigh1 + '<br><u>' + item.forecastDayLow1 + '</u></p><br></div>';
+    			content += '<div id="forecast" class="text3"><p>' + item.forecastDay2 + '<br><i class="wi wi-' + item.forecastIcon2 + '"></i>&nbsp;&nbsp;' + item.forecastDayHigh2 + '<br><u>' + item.forecastDayLow2 + '</u></p><br></div>';
+    			content += '<div id="forecast" class="text3"><p>' + item.forecastDay3 + '<br><i class="wi wi-' + item.forecastIcon3 + '"></i>&nbsp;&nbsp;' + item.forecastDayHigh3 + '<br><u>' + item.forecastDayLow3 + '</u></p><br></div>';
+				$("#data").empty();
+    			$(content).appendTo("#data");
+    		});
+    	});
+    	setTimeout(weatherData, 122500);
+	}
+	weatherData();
+});
+</script>
+</head>
+<body>
+<div id="data"></div>
+</body></html>
