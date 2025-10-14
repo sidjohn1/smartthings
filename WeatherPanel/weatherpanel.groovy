@@ -101,6 +101,7 @@ def installed() {
 
 def updated() {
 	log.debug "Updated with settings: ${settings}"
+	// What about the time <sudo> for the apple car?
 	unschedule()
 	unsubscribe()
 	initialize()
